@@ -1,0 +1,217 @@
+/* =========================
+   PAGE BACKGROUND
+========================= */
+.page {
+  min-height: 100vh;
+  background-color: #0b1120;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+}
+
+/* =========================
+   MAIN AUTH CONTAINER
+========================= */
+.authBox {
+  width: 900px;
+  height: 520px; /* fixed height for stability */
+  display: flex;
+  border-radius: 22px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.6);
+}
+
+/* =========================
+   LEFT IMAGE PANEL (DESKTOP)
+========================= */
+.imagePanel {
+  width: 45%;
+  background-color: #111827;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.imagePanel img {
+  max-width: 80%;
+  height: auto;
+  margin-bottom: 20px;
+}
+
+.imagePanel h3 {
+  color: #ffffff;
+  margin-bottom: 10px;
+}
+
+.imagePanel p {
+  color: #9ca3af;
+  font-size: 0.9rem;
+}
+
+/* =========================
+   RIGHT FORM PANEL
+========================= */
+.formPanel {
+  width: 55%;
+  padding: 40px 45px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* =========================
+   TEXT
+========================= */
+.formPanel h2 {
+  color: #ffffff;
+  margin-bottom: 6px;
+}
+
+.subtitle {
+  color: #cbd5f5;
+  font-size: 0.9rem;
+  margin-bottom: 18px;
+}
+
+/* =========================
+   TABS
+========================= */
+.tabs {
+  display: flex;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  margin-bottom: 25px;
+  overflow: hidden;
+}
+
+.tabs button {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  cursor: pointer;
+  background: transparent;
+  color: #c7d2fe;
+  font-weight: 600;
+  transition: background 0.25s ease;
+}
+
+.active {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  background-color: #4338ca !important;
+}
+
+/* =========================
+   FORM & INPUTS (STABLE)
+========================= */
+.formPanel form {
+  display: flex;
+  flex-direction: column;
+}
+
+.formPanel input {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 14px;
+  border-radius: 10px;
+  border: none;
+  outline: none;
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  font-size: 0.95rem;
+}
+
+.formPanel input::placeholder {
+  color: #d1d5db;
+}
+
+/* Reserve space so inputs never jump */
+.formPanel input[type="text"]:first-child {
+  min-height: 44px;
+}
+
+/* =========================
+   SUBMIT BUTTON (SOLID)
+========================= */
+.formPanel button[type="submit"] {
+  margin-top: 10px;
+  padding: 12px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1rem;
+  background-color: #4f46e5;
+  color: #ffffff;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.formPanel button:hover {
+  /* background-color: #4338ca; */
+  transform: translateY(-2px);
+}
+
+.formPanel button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* =========================
+   ERROR & SUCCESS
+========================= */
+.error {
+  background-color: rgba(239, 68, 68, 0.2);
+  color: #fecaca;
+  padding: 8px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  margin-bottom: 10px;
+}
+
+.success {
+  background-color: rgba(34, 197, 94, 0.2);
+  color: #bbf7d0;
+  padding: 8px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  margin-bottom: 10px;
+}
+
+
+
+
+/* =========================
+   RESPONSIVE (TABLET & MOBILE)
+========================= */
+@media (max-width: 900px) {
+  .authBox {
+    width: 100%;
+    height: auto;
+  }
+
+  .imagePanel {
+    display: none; 
+  }
+
+  .formPanel {
+    width: 100%;
+    padding: 35px;
+  }
+}
+
+@media (max-width: 480px) {
+  .formPanel {
+    padding: 28px 22px;
+  }
+
+  .formPanel h2 {
+    font-size: 1.4rem;
+  }
+}

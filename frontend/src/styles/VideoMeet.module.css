@@ -1,0 +1,182 @@
+/* ===== Root ===== */
+.wrapper {
+  height: 100vh;
+  background: #0f172a; /* slate-900 */
+  color: white;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===== Lobby ===== */
+.lobby {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4rem;
+  height: 100%;
+}
+
+.lobbyCard {
+  background: #020617;
+  padding: 2rem;
+  border-radius: 12px;
+  width: 320px;
+}
+
+.lobbyCard h2 {
+  margin-bottom: 1rem;
+}
+
+.input {
+  width: 100%;
+  padding: 0.7rem;
+  margin-bottom: 1rem;
+  border-radius: 6px;
+  border: none;
+}
+
+.connectBtn {
+  width: 100%;
+  padding: 0.7rem;
+  background: #16a34a;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* ===== Lobby Preview ===== */
+.preview {
+  width: 420px;
+}
+
+.videoBox {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: black;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.videoBox video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ===== Call Layout ===== */
+.call {
+  flex: 1;
+  padding: 1.5rem;
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+/* ===== Peers Grid ===== */
+.peers {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
+.peerTile {
+  background: #020617;
+  border-radius: 12px;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+}
+
+.peerTile video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ===== Self View ===== */
+.selfView {
+  position: fixed;
+  bottom: 90px;
+  right: 20px;
+  width: 220px;
+  aspect-ratio: 16 / 9;
+  background: black;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+  z-index: 10;
+}
+
+.selfView video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ===== Controls ===== */
+.controls {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  padding: 1rem;
+  background: rgba(2, 6, 23, 0.9);
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.controlBtn {
+  padding: 0.6rem 1.2rem;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  background: #1e293b;
+  color: white;
+}
+
+.endBtn {
+  background: #dc2626;
+}
+
+/* ===== Recording Button ===== */
+.recordBtn {
+  padding: 0.6rem 1.4rem;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.9rem;
+  background: #1e293b; /* slate */
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: all 0.2s ease;
+}
+
+.recordBtn:hover {
+  background: #334155;
+}
+
+/* 🔴 Active recording state */
+.recording {
+  background: #dc2626; /* red */
+  animation: pulse 1.5s infinite;
+}
+
+.recording:hover {
+  background: #b91c1c;
+}
+
+/* 🔴 Pulse animation */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.6);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(220, 38, 38, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0);
+  }
+}
+
