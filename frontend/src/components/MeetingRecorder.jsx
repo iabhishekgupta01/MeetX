@@ -1,151 +1,87 @@
-import React, { useRef, useState } from "react";
-import styles from "../styles/VideoMeet.module.css";
+import { useEffect, useRef } from "react";
 
-function MeetingRecorder({ localStream, peerStreams = [] }) {
-  const mediaRecorderRef = useRef(null);
-  const recordedChunksRef = useRef([]);
-  const audioContextRef = useRef(null);
+function MeetingRecorder({ localStream, meetingId }) {
+  const recorderRef = useRef(null);
 
-  const [isRecording, setIsRecording] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
+  useEffect(() => {
+    if (!localStream) return;
 
-  /* ---------- MIX AUDIO (UNCHANGED) ---------- */
-  const createMixedAudioStream = async () => {
-    const audioContext = new AudioContext();
-    await audioContext.resume();
+    const audioStream = new MediaStream(
+      localStream.getAudioTracks()
+    );
 
-    const destination = audioContext.createMediaStreamDestination();
-    audioContextRef.current = audioContext;
-
-    // 🎤 Local mic
-    if (localStream) {
-      localStream.getAudioTracks().forEach((track) => {
-        const source = audioContext.createMediaStreamSource(
-          new MediaStream([track])
-        );
-        source.connect(destination);
-      });
-    }
-
-    // 🔊 Peer audio
-    peerStreams.forEach((stream) => {
-      stream.getAudioTracks().forEach((track) => {
-        const source = audioContext.createMediaStreamSource(
-          new MediaStream([track])
-        );
-        source.connect(destination);
-      });
+    const recorder = new MediaRecorder(audioStream, {
+      mimeType: "audio/webm;codecs=opus",
     });
 
-    return destination.stream;
-  };
+    recorderRef.current = recorder;
 
-  /* ---------- START RECORDING ---------- */
-  const startRecording = async () => {
-    try {
-      const screenStream = await navigator.mediaDevices.getDisplayMedia({
-        video: true,
-        audio: false,
-      });
-
-      const mixedAudioStream = await createMixedAudioStream();
-
-      const finalStream = new MediaStream([
-        screenStream.getVideoTracks()[0],
-        ...mixedAudioStream.getAudioTracks(),
-      ]);
-
-      recordedChunksRef.current = [];
-
-      const recorder = new MediaRecorder(finalStream, {
-        mimeType: "video/webm; codecs=vp8,opus",
-      });
-
-      mediaRecorderRef.current = recorder;
-
-      recorder.ondataavailable = (event) => {
-        if (event.data && event.data.size > 0) {
-          recordedChunksRef.current.push(event.data);
-        }
-      };
-
-      recorder.onstop = async () => {
-        audioContextRef.current?.close();
-        await uploadRecording(); // 🔴 CHANGED
-      };
-
-      recorder.start();
-      setIsRecording(true);
-
-      // Auto stop if screen sharing stops
-      screenStream.getVideoTracks()[0].onended = () => {
-        stopRecording();
-      };
-    } catch (err) {
-      console.error("Recording failed:", err);
-    }
-  };
-
-  /* ---------- STOP RECORDING ---------- */
-  const stopRecording = () => {
-    if (!mediaRecorderRef.current) return;
-
-    mediaRecorderRef.current.stop();
-    setIsRecording(false);
-    setIsProcessing(true);
-  };
-
-  /* ---------- UPLOAD TO BACKEND ---------- */
-  const uploadRecording = async () => {
-    try {
-      if (!recordedChunksRef.current.length) return;
-
-      const blob = new Blob(recordedChunksRef.current, {
-        type: "video/webm",
-      });
+    recorder.ondataavailable = async (e) => {
+      if (!e.data.size) return;
 
       const formData = new FormData();
-      formData.append("file", blob, "meeting.webm");
+      formData.append("file", e.data);
+      formData.append("meetingId", meetingId);
+      formData.append("final", "false");
 
-      const res = await fetch(
-        "http://localhost:8080/api/v1/meeting/upload",
-        {
+      try {
+        await fetch("http://localhost:8080/api/v1/meeting/upload", {
           method: "POST",
           body: formData,
+        });
+      } catch (err) {
+        console.error("Upload chunk failed:", err);
+      }
+    };
+
+    recorder.start(5000); // send chunk every 5s
+
+    return () => {
+      recorder.stop();
+    };
+  }, [localStream, meetingId]);
+
+  // 🔥 listen for meeting end
+  useEffect(() => {
+    const handleEnd = async () => {
+      if (!recorderRef.current) return;
+
+      recorderRef.current.ondataavailable = async (e) => {
+        if (!e.data.size) return;
+        const formData = new FormData();
+        formData.append("file", e.data);
+        formData.append("meetingId", meetingId);
+        formData.append("final", "true");
+
+        try {
+          const response = await fetch("http://localhost:8080/api/v1/meeting/upload", {
+            method: "POST",
+            body: formData,
+          });
+
+          const data = await response.json();
+          if (data?.fileName) {
+            const link = document.createElement("a");
+            link.href = `http://localhost:8080/api/v1/meeting/download/${data.fileName}`;
+            link.download = data.fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          }
+        } catch (err) {
+          console.error("Final upload failed:", err);
         }
-      );
+      };
 
-      const data = await res.json();
+      recorderRef.current.stop();
+    };
 
-console.log("Backend response:", data);
+    window.addEventListener("MEETING_END", handleEnd);
+    return () =>
+      window.removeEventListener("MEETING_END", handleEnd);
+  }, [meetingId]);
 
-
-      // 🔴 Download generated PDF
-     window.location.href = `http://localhost:8080/api/v1/meeting/download/${data.file}`;
-
-    } catch (err) {
-      console.error("Upload failed:", err);
-      alert("Meeting processing failed");
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  return (
-    <button
-      className={`${styles.recordBtn} ${
-        isRecording ? styles.recording : ""
-      }`}
-      disabled={isProcessing}
-      onClick={isRecording ? stopRecording : startRecording}
-    >
-      {isProcessing
-        ? "Generating Notes..."
-        : isRecording
-        ? "Stop Recording"
-        : "Record Meeting"}
-    </button>
-  );
+  return null; // no UI button
 }
 
 export default MeetingRecorder;

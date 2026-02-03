@@ -1,7 +1,6 @@
 const express = require("express");
 const router = express.Router();
 const multer = require("multer");
-const path = require("path");
 
 const {
   uploadMeetingAudio,
@@ -10,10 +9,10 @@ const {
 
 const upload = multer({ dest: "uploads/" });
 
-// upload meeting recording
+// upload audio chunks
 router.post("/upload", upload.single("file"), uploadMeetingAudio);
 
-// download generated pdf
+// download pdf
 router.get("/download/:file", downloadMeetingFile);
 
 module.exports = router;
