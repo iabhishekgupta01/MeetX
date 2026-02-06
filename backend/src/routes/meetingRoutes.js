@@ -13,7 +13,7 @@ const {
 } = require("../controllers/meetingManagementController");
 
 // Replace with your Groq API Key
-const groq = new Groq({ apiKey: "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" });
+const groq = new Groq({ apiKey: process.env.grok });
 
 // Meeting Management Routes
 router.post("/create", createMeeting);
