@@ -42,23 +42,41 @@ exports.generatePdf = (data, meetingId) =>
   });
 
 function section(doc, title, content) {
-  doc.fontSize(16).font("Helvetica-Bold").text(title, { underline: true }).moveDown(0.5);
-  doc.fontSize(11).font("Helvetica");
+  doc.fontSize(16).font("Helvetica-Bold").text(title, { 
+    underline: true,
+    color: "#000000"
+  }).moveDown(0.5);
   
-  if (Array.isArray(content)) {
-    if (content.length === 0) {
-      doc.text("—", { color: "#666666" });
-    } else {
-      content.forEach((c) => {
-        const text = String(c || "").trim();
-        if (text && text !== "—") {
-          doc.text(`• ${text}`, { align: "left", width: 500 });
-        }
-      });
+  doc.fontSize(11).font("Helvetica").fillColor("#000000");
+  
+  if (!content || (Array.isArray(content) && content.length === 0)) {
+    doc.text("—");
+  } else if (Array.isArray(content)) {
+    content.forEach((c) => {
+      const text = String(c || "").trim();
+      if (text && text.length > 0 && text !== "—") {
+        doc.text(`• ${text}`, { 
+          align: "left", 
+          width: 500,
+          continued: false 
+        });
+      }
+    });
+    if (content.every(c => !c || String(c).trim() === "—")) {
+      doc.text("—");
     }
   } else {
-    const text = String(content || "—").trim();
-    doc.text(text, { align: "left", width: 500 });
+    const text = String(content || "").trim();
+    if (text && text.length > 0) {
+      doc.text(text, { 
+        align: "left", 
+        width: 500,
+        continued: false 
+      });
+    } else {
+      doc.text("—");
+    }
   }
-  doc.moveDown(0.5);
+  
+  doc.moveDown(0.7);
 }

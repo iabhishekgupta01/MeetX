@@ -61,7 +61,7 @@ exports.transcribeAudio = (wavFile) =>
       console.log("WHISPER CMD:", bin, args.join(" "));
 
       let finished = false;
-      const inactivityMs = 2 * 60 * 1000; // 2 minutes of no output = timeout
+      const inactivityMs = 3 * 60 * 1000; // 2 minutes of no output = timeout
       let inactivityTimeout;
 
       const resetInactivityTimer = () => {

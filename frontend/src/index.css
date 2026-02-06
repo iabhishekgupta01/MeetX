@@ -11,3 +11,41 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+:root {
+  /* --- BACKGROUNDS --- */
+  --bg-app: #0b0c15;        /* Very dark purple-black */
+  --bg-panel: #151621;      /* Slightly lighter panel */
+  --bg-card: #1e1f2e;       /* Card background */
+  --bg-card-hover: #262738; /* Card hover state */
+  
+  /* --- PRIMARY ACCENTS (Gradient) --- */
+  --primary: #8b5cf6;       /* Violet */
+  --primary-glow: rgba(139, 92, 246, 0.4);
+  --gradient-primary: linear-gradient(135deg, #8b5cf6, #d946ef); /* Violet to Fuschia */
+  
+  /* --- SECONDARY ACCENTS --- */
+  --secondary: #06b6d4;     /* Cyan */
+  --gradient-secondary: linear-gradient(135deg, #06b6d4, #3b82f6);
+  
+  /* --- STATUS COLORS --- */
+  --success: #10b981;       /* Green */
+  --warning: #f59e0b;       /* Orange */
+  --danger: #ef4444;        /* Red */
+  
+  /* --- TEXT & BORDERS --- */
+  --text-main: #f8fafc;     /* White */
+  --text-muted: #94a3b8;    /* Gray */
+  --border-color: rgba(255, 255, 255, 0.08);
+  --border-hover: rgba(139, 92, 246, 0.5); /* Purple border on hover */
+  
+  /* --- SHADOWS --- */
+  --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+  
+  /* --- RADII --- */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+}

@@ -1,0 +1,97 @@
+/* Default state: Hidden on Desktop */
+.mobileActionGrid {
+  display: none;
+}
+
+/* --- MOBILE VIEW --- */
+@media (max-width: 768px) {
+  
+  .mobileActionGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Side-by-side layout */
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    margin-top: 0.5rem;
+    animation: fadeIn 0.4s ease-out;
+  }
+
+  /* Base Card Styling */
+  .actionCard {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.8rem;
+    padding: 1.2rem;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    cursor: pointer;
+    transition: transform 0.2s;
+    overflow: hidden;
+    text-align: left;
+    min-height: 110px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  }
+
+  .actionCard:active {
+    transform: scale(0.96);
+  }
+
+  /* 1. Create Card (Teal/Green Theme) */
+  .createCard {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(5, 150, 105, 0.15));
+    border-color: rgba(16, 185, 129, 0.3);
+  }
+
+  .createCard .iconWrapper {
+    background: rgba(16, 185, 129, 0.25);
+    color: #34d399;
+  }
+
+  /* 2. Join Card (Blue Theme) */
+  .joinCard {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(37, 99, 235, 0.15));
+    border-color: rgba(59, 130, 246, 0.3);
+  }
+
+  .joinCard .iconWrapper {
+    background: rgba(59, 130, 246, 0.25);
+    color: #60a5fa;
+  }
+
+  /* Icon Styling */
+  .iconWrapper {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Text Styling */
+  .textWrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+  }
+
+  .title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #f1f5f9;
+    line-height: 1.2;
+  }
+
+  .subtitle {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #94a3b8;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

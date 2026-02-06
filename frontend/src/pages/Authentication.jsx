@@ -1,9 +1,11 @@
 import React, { useContext, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../contexts/AuthContext";
 import styles from "../styles/Authentication.module.css";
 
 
 export default function Authentication() {
+  const navigate = useNavigate();
   const [isSignup, setIsSignup] = useState(false);
   const [name, setName] = useState("");
   const [username, setUsername] = useState("");
@@ -29,9 +31,15 @@ export default function Authentication() {
         setIsSignup(false);
       } else {
         console.log("Logging in");
-        await handleLogin(username, password);
+        const response = await handleLogin(username, password);
         console.log("Logged in successfully");
-        window.location.href = "/";
+        
+        // Store user info
+        localStorage.setItem("username", username);
+        localStorage.setItem("userId", username); // Using username as userId for now
+        
+        // Redirect to dashboard
+        navigate("/dashboard");
       }
 
       setName("");
@@ -89,6 +97,7 @@ export default function Authentication() {
                 placeholder="Full Name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+                required
               />
             )}
 
@@ -97,6 +106,7 @@ export default function Authentication() {
               placeholder="Username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
+              required
             />
 
             <input
@@ -104,6 +114,7 @@ export default function Authentication() {
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              required
             />
 
             {error && <div className={styles.error}>{error}</div>}

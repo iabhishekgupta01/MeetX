@@ -1,20 +1,31 @@
 
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import axios from "axios";
 
 
 
-const Backendserver = "http://localhost:8080";
+const Backendserver ="http://localhost:5000";
 
 export const AuthContext = React.createContext({});
 
 export const AuthProvider = ({children}) => {
 
     const [userData, setUserData] = useState();
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
     const client = axios.create({
         baseURL:`${Backendserver}/api/v1/users`
     });
+
+    // Check if user is already logged in on mount
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            setIsAuthenticated(true);
+        }
+        setIsLoading(false);
+    }, []);
 
     let handleRegister = async (name, username, password) => {
 
@@ -45,6 +56,7 @@ export const AuthProvider = ({children}) => {
 
             if(request.status===200){
                 localStorage.setItem('token', request.data.token);
+                setIsAuthenticated(true);
                 return request.data.token;
             }
         }catch(err){
@@ -52,7 +64,13 @@ export const AuthProvider = ({children}) => {
         }
     }
 
-    const data={handleLogin,handleRegister,userData,setUserData};
+    const handleLogout = () => {
+        localStorage.removeItem('token');
+        setIsAuthenticated(false);
+        setUserData(null);
+    }
+
+    const data={handleLogin,handleRegister,userData,setUserData,isAuthenticated,setIsAuthenticated,isLoading,handleLogout};
 
 
     return (

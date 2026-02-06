@@ -2,21 +2,95 @@ const { Schema } = require("mongoose");
 const mongoose=require("mongoose");
 
 const meetingSchema=new Schema({
-    user_id:{
+    meetingId:{
         type:String,
-        require:true
+        unique:true,
+        required:true
     },
     meetingCode:{
         type:String,
+        unique:true,
+        required:true,
+        uppercase:true
+    },
+    hostId:{
+        type:String,
         required:true
     },
-    date:{
+    hostName:{
+        type:String,
+        required:true
+    },
+    title:{
+        type:String,
+        default:"Untitled Meeting"
+    },
+    description:{
+        type:String,
+        default:""
+    },
+    participants:[
+        {
+            userId:{
+                type:String,
+                required:true
+            },
+            username:{
+                type:String,
+                required:true
+            },
+            joinedAt:{
+                type:Date,
+                default:Date.now()
+            },
+            leftAt:{
+                type:Date,
+                default:null
+            },
+            duration:{
+                type:Number,
+                default:0
+            }
+        }
+    ],
+    createdAt:{
         type:Date,
-        default:Date.now(),
+        default:Date.now()
+    },
+    startedAt:{
+        type:Date,
+        default:null
+    },
+    endedAt:{
+        type:Date,
+        default:null
+    },
+    duration:{
+        type:Number,
+        default:0
+    },
+    transcript:{
+        type:String,
+        default:""
+    },
+    summary:{
+        type:String,
+        default:""
+    },
+    isActive:{
+        type:Boolean,
+        default:true
+    },
+    recordingFile:{
+        type:String,
+        default:null
+    },
+    expiresAt:{
+        type:Date,
         required:true
     }
 });
 
-const Meeting=mongoose.model("Meeting",meetingSchema);
+const Meeting=mongoose.model("meetings",meetingSchema);
 
 module.exports={Meeting};

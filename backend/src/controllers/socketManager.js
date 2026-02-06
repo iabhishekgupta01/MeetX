@@ -1,10 +1,14 @@
 const { Server } = require("socket.io");
+const { Meeting } = require("../models/meetingModel");
 
 
 
 let connections = {}; //storing socket.id of each user
 let messages = {};
 let timeOnline = {};
+let usernames = {}; // storing username for each socket.id
+let socketToMeeting = {}; // mapping socket.id to meetingId
+let socketToUserId = {}; // mapping socket.id to userId
 
 
 
@@ -24,27 +28,54 @@ module.exports = (server) => {
         
         
 
-        socket.on("join-call", (room) => {
+        socket.on("join-call", async (meetingData) => {
+            try {
+                const { meetingId, userId, username } = meetingData;
 
-            if (connections[room] == undefined) {
-                connections[room] = [];
-            }
-            connections[room].push(socket.id);
+                // Store mappings
+                socketToMeeting[socket.id] = meetingId;
+                socketToUserId[socket.id] = userId;
+                usernames[socket.id] = username;
 
-            timeOnline[socket.id] = new Date();
+                if (connections[meetingId] == undefined) {
+                    connections[meetingId] = [];
+                }
+                connections[meetingId].push(socket.id);
 
-            connections[room].forEach((userId) => { //  here userId is SocketIds already stored
-                io.to(userId).emit("user-joined", socket.id,connections[room]);
-            });
+                timeOnline[socket.id] = new Date();
 
+                // Update meeting in database
+                const meeting = await Meeting.findOne({ meetingId });
+                if (meeting) {
+                    const participantIndex = meeting.participants.findIndex(p => p.userId === userId);
+                    if (participantIndex === -1) {
+                        meeting.participants.push({
+                            userId,
+                            username,
+                            joinedAt: new Date()
+                        });
+                        await meeting.save();
+                    } else if (meeting.participants[participantIndex].username !== username) {
+                        meeting.participants[participantIndex].username = username;
+                        await meeting.save();
+                    }
+                    
+                    // Emit meeting object to all participants
+                    io.to(meetingId).emit("meeting-updated", meeting);
+                }
 
-            if (messages[room] != undefined) {
-
-                messages[room].forEach((msg) => {
-                    io.to(socket.id).emit("chat-message", msg['data'], msg['sender'], msg['socket-id-sender']);
+                connections[meetingId].forEach((userId) => {
+                    io.to(userId).emit("user-joined", socket.id, connections[meetingId]);
                 });
-            }
 
+                if (messages[meetingId] != undefined) {
+                    messages[meetingId].forEach((msg) => {
+                        io.to(socket.id).emit("chat-message", msg['data'], msg['sender'], msg['socket-id-sender']);
+                    });
+                }
+            } catch (error) {
+                console.error("Error in join-call:", error);
+            }
         });
 
         socket.on("signal", (toId, msg) => {
@@ -53,32 +84,44 @@ module.exports = (server) => {
 
         socket.on("chat-message", (data, sender) => {
 
-            const [matchingRoom, found]=Object.entries(connections)
-            .reduce(([room , isFound],[roomKey,roomValue])=>{
-                if(!isFound && roomValue.includes(socket.id)){
-                    return [roomKey,true];
-                }
-                return [room, isFound];
-
-            },['',false]);
-
-            if(found==true){
-
-                if(messages[matchingRoom]==undefined){
-                    messages[matchingRoom]=[];
-                }
-                messages[matchingRoom].push({"sender":sender, "data":data, "socket-id-sender":socket.id});
-
-                console.log("message :",data,sender,socket.id);
-
-                connections[matchingRoom].forEach((userId)=>{
-                    io.to(userId).emit("chat-message",data,sender,socket.id);
-                });
+            const meetingId = socketToMeeting[socket.id];
+            
+            if (!meetingId || !connections[meetingId]) {
+                return;
             }
+
+            if(messages[meetingId]==undefined){
+                messages[meetingId]=[];
+            }
+            messages[meetingId].push({"sender":sender, "data":data, "socket-id-sender":socket.id});
+
+            console.log("message :",data,sender,socket.id);
+
+            connections[meetingId].forEach((userId)=>{
+                io.to(userId).emit("chat-message",data,sender,socket.id);
+            });
 
         });
 
-        socket.on("disconnect", () => {
+        socket.on("user-username", (userName) => {
+            usernames[socket.id] = userName;
+            console.log(`User ${socket.id} set username to: ${userName}`);
+
+            // Find the room this user is in
+            const userRoom = Object.entries(connections).find(([room, users]) => 
+                users.includes(socket.id)
+            );
+
+            // Broadcast username to all users in the same room
+            if (userRoom) {
+                const [room, users] = userRoom;
+                users.forEach((userId) => {
+                    io.to(userId).emit("user-username-update", socket.id, userName);
+                });
+            }
+        });
+
+        socket.on("disconnect", async () => {
 
             let diffTime=Math.abs(new Date()-timeOnline[socket.id]);
 
@@ -105,10 +148,36 @@ module.exports = (server) => {
                     }
                 }
 
-
             }
 
+            // Update meeting when user leaves
+            const meetingId = socketToMeeting[socket.id];
+            const userId = socketToUserId[socket.id];
+            
+            if (meetingId && userId) {
+                try {
+                    const meeting = await Meeting.findOne({ meetingId });
+                    if (meeting) {
+                        const participantIndex = meeting.participants.findIndex(p => p.userId === userId);
+                        if (participantIndex !== -1) {
+                            meeting.participants[participantIndex].leftAt = new Date();
+                            meeting.participants[participantIndex].duration = Math.floor(
+                                (meeting.participants[participantIndex].leftAt - meeting.participants[participantIndex].joinedAt) / 1000
+                            );
+                            await meeting.save();
+                            io.to(meetingId).emit("meeting-updated", meeting);
+                        }
+                    }
+                } catch (error) {
+                    console.error("Error updating meeting on disconnect:", error);
+                }
+            }
 
+            // Clean up mappings
+            delete usernames[socket.id];
+            delete timeOnline[socket.id];
+            delete socketToMeeting[socket.id];
+            delete socketToUserId[socket.id];
 
         });
     })

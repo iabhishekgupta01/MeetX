@@ -1,87 +1,62 @@
-import { useEffect, useRef } from "react";
+import React, { useRef } from "react";
+import axios from "axios";
+import { jsPDF } from "jspdf";
 
-function MeetingRecorder({ localStream, meetingId }) {
-  const recorderRef = useRef(null);
+const MeetingRecorder = ({ transcript, setTranscript, isRecording, setIsRecording }) => {
+  const recognitionRef = useRef(null);
 
-  useEffect(() => {
-    if (!localStream) return;
+  const startAI = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) return alert("Speech API not supported in this browser.");
 
-    const audioStream = new MediaStream(
-      localStream.getAudioTracks()
-    );
+    const recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = "hi-IN"; // Handles Hindi/English mix
 
-    const recorder = new MediaRecorder(audioStream, {
-      mimeType: "audio/webm;codecs=opus",
-    });
+    recognition.onresult = (event) => {
+      let liveText = "";
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        liveText += event.results[i][0].transcript;
+      }
+      setTranscript((prev) => prev + " " + liveText);
+    };
 
-    recorderRef.current = recorder;
+    recognition.start();
+    recognitionRef.current = recognition;
+    setIsRecording(true);
+  };
 
-    recorder.ondataavailable = async (e) => {
-      if (!e.data.size) return;
-
-      const formData = new FormData();
-      formData.append("file", e.data);
-      formData.append("meetingId", meetingId);
-      formData.append("final", "false");
+  const stopAI = async () => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+      setIsRecording(false);
 
       try {
-        await fetch("http://localhost:8080/api/v1/meeting/upload", {
-          method: "POST",
-          body: formData,
+        const res = await axios.post("http://localhost:5000/api/v1/meeting/summarize", {
+          transcript: transcript,
         });
+        
+        const doc = new jsPDF();
+        doc.text(doc.splitTextToSize(res.data.formattedText, 180), 10, 10);
+        doc.save("Meeting_Summary.pdf");
       } catch (err) {
-        console.error("Upload chunk failed:", err);
+        console.error("AI Error:", err);
       }
-    };
+    }
+  };
 
-    recorder.start(5000); // send chunk every 5s
-
-    return () => {
-      recorder.stop();
-    };
-  }, [localStream, meetingId]);
-
-  // 🔥 listen for meeting end
-  useEffect(() => {
-    const handleEnd = async () => {
-      if (!recorderRef.current) return;
-
-      recorderRef.current.ondataavailable = async (e) => {
-        if (!e.data.size) return;
-        const formData = new FormData();
-        formData.append("file", e.data);
-        formData.append("meetingId", meetingId);
-        formData.append("final", "true");
-
-        try {
-          const response = await fetch("http://localhost:8080/api/v1/meeting/upload", {
-            method: "POST",
-            body: formData,
-          });
-
-          const data = await response.json();
-          if (data?.fileName) {
-            const link = document.createElement("a");
-            link.href = `http://localhost:8080/api/v1/meeting/download/${data.fileName}`;
-            link.download = data.fileName;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-          }
-        } catch (err) {
-          console.error("Final upload failed:", err);
-        }
-      };
-
-      recorderRef.current.stop();
-    };
-
-    window.addEventListener("MEETING_END", handleEnd);
-    return () =>
-      window.removeEventListener("MEETING_END", handleEnd);
-  }, [meetingId]);
-
-  return null; // no UI button
-}
+  return (
+    <button 
+      onClick={isRecording ? stopAI : startAI}
+      style={{
+        backgroundColor: isRecording ? "#ff4742" : "#28a745",
+        color: "white", padding: "10px 20px", border: "none", borderRadius: "5px", cursor: "pointer"
+      }}
+    >
+      {isRecording ? "Stop & Summarize" : "AI Secretary"}
+    </button>
+  );
+};
 
 export default MeetingRecorder;

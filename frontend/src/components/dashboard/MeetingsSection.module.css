@@ -1,0 +1,357 @@
+/* MeetingsSection.module.css */
+
+/* --- Layout Containers --- */
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.grid {
+  display: grid;
+  /* Responsive Grid: Cards will be at least 280px wide */
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* --- Card Styles --- */
+.card {
+  background: #1e293b; /* Dark Slate */
+  border: 1px solid #334155;
+  border-radius: 16px;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  min-height: 180px;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.4);
+  border-color: #475569;
+}
+
+.cardCompleted {
+  opacity: 0.8;
+  /* subtle grayscale for history items */
+  filter: grayscale(0.2); 
+  border-color: #1e293b;
+}
+
+.cardCompleted:hover {
+  opacity: 1;
+  filter: none;
+  border-color: #475569;
+}
+
+/* --- Decor Bar (Top of Card) --- */
+.decorBar {
+  height: 4px;
+  width: 100%;
+}
+
+.barHost { 
+  background: linear-gradient(90deg, #3b82f6, #60a5fa); 
+}
+
+.barGuest { 
+  background: linear-gradient(90deg, #10b981, #34d399); 
+}
+
+/* --- Card Content --- */
+.cardContent {
+  padding: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  flex: 1;
+}
+
+/* --- Header Section --- */
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.8rem;
+}
+
+.titleGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  flex: 1;
+  min-width: 0; /* Prevents text overflow issues */
+}
+
+.title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #f1f5f9;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+}
+
+.roleHost, .roleGuest {
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.roleHost { color: #60a5fa; }
+.roleGuest { color: #34d399; }
+
+/* --- Status Badges --- */
+.statusBadgeWrapper {
+  flex-shrink: 0;
+}
+
+.timeBadge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Badge Colors */
+.safe { 
+  background: rgba(16, 185, 129, 0.1); 
+  color: #34d399; 
+}
+
+.warn { 
+  background: rgba(245, 158, 11, 0.1); 
+  color: #fbbf24; 
+}
+
+.urgent { 
+  background: rgba(239, 68, 68, 0.1); 
+  color: #f87171; 
+  border: 1px solid rgba(239, 68, 68, 0.2); 
+}
+
+.expired { 
+  background: #0f172a; 
+  color: #64748b; 
+  border: 1px solid #334155;
+}
+
+.badgeFinished {
+  background: #334155;
+  color: #94a3b8;
+  font-size: 0.75rem;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+/* Pulsing Dot Animation for Urgent items */
+.pulseDot {
+  width: 6px;
+  height: 6px;
+  background: currentColor;
+  border-radius: 50%;
+  animation: pulse 1.5s infinite;
+}
+
+/* --- Footer Actions --- */
+.cardFooter {
+  margin-top: auto; /* Pushes footer to the bottom */
+  display: flex;
+  gap: 0.8rem;
+}
+
+/* 1. Primary Action (Join) */
+.btnJoin {
+  flex: 1;
+  background: #3b82f6;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 0.7rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btnJoin:hover:not(:disabled) { 
+  background: #2563eb; 
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.btnJoin:disabled { 
+  background: #334155; 
+  color: #64748b; 
+  cursor: not-allowed; 
+}
+
+/* 2. Secondary Action (View Details - History) */
+.btnDetails {
+  flex: 1;
+  background: #334155;
+  border: 1px solid #475569;
+  border-radius: 8px;
+  color: #e2e8f0;
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 0.7rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btnDetails:hover {
+  background: #475569;
+  color: #fff;
+}
+
+/* 3. Share Button */
+.btnShare {
+  background: transparent;
+  border: 1px solid #475569;
+  color: #94a3b8;
+  width: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btnShare:hover {
+  border-color: #cbd5e1;
+  color: #fff;
+  background: rgba(255,255,255,0.05);
+}
+
+/* --- History Filters (Horizontal Scroll) --- */
+.filterScroll {
+  display: flex;
+  gap: 0.8rem;
+  overflow-x: auto;
+  padding: 4px 4px 12px 4px; /* Space for shadow/focus */
+  margin-bottom: 0.5rem;
+  scrollbar-width: none; /* Firefox */
+}
+.filterScroll::-webkit-scrollbar { display: none; } /* Chrome */
+
+.filterPill {
+  white-space: nowrap;
+  background: #0f172a;
+  border: 1px solid #334155;
+  color: #94a3b8;
+  padding: 0.5rem 1rem;
+  border-radius: 99px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s;
+}
+
+.filterPill:hover {
+  background: #1e293b;
+  color: #e2e8f0;
+}
+
+.pillActive {
+  background: #3b82f6;
+  border-color: #3b82f6;
+  color: white;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+}
+
+.pillActive:hover {
+  background: #2563eb;
+}
+
+.count {
+  background: #1e293b;
+  font-size: 0.7rem;
+  padding: 2px 8px;
+  border-radius: 10px;
+  min-width: 20px;
+  text-align: center;
+}
+
+.pillActive .count {
+  background: rgba(255,255,255,0.2);
+  color: white;
+}
+
+/* --- Empty State --- */
+.emptyState {
+  grid-column: 1 / -1; /* Span full width */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 1rem;
+  color: #64748b;
+  background: rgba(30, 41, 59, 0.3);
+  border-radius: 16px;
+  border: 2px dashed #334155;
+  min-height: 250px;
+}
+
+.emptyIcon { 
+  font-size: 3rem; 
+  margin-bottom: 1rem; 
+  opacity: 0.5; 
+}
+
+.emptyState p { 
+  margin: 0; 
+  font-size: 1.1rem; 
+  font-weight: 600; 
+  color: #94a3b8; 
+}
+
+.emptyState span { 
+  font-size: 0.9rem; 
+  margin-top: 0.5rem; 
+}
+
+/* --- Animations --- */
+@keyframes fadeIn { 
+  from { opacity: 0; transform: translateY(10px); } 
+  to { opacity: 1; transform: translateY(0); } 
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.4; }
+  100% { opacity: 1; }
+}
+
+/* --- Mobile Optimization --- */
+@media (max-width: 600px) {
+  .grid {
+    grid-template-columns: 1fr; /* Stack cards vertically on phones */
+  }
+  
+  .card {
+    min-height: auto; /* Allow auto height on mobile */
+  }
+}

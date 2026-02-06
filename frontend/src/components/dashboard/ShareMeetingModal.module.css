@@ -1,0 +1,212 @@
+/* Container for the specific content */
+.compactModalContent {
+  background: var(--bg-card);
+  width: 100%;
+  max-width: 420px; /* Limits width for that compact feel */
+  border-radius: 16px;
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  position: relative;
+  margin: 0 auto;
+  font-family: var(--font-body);
+  color: var(--text-main);
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.2rem 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-panel);
+}
+
+.header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  font-family: var(--font-display);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 85%;
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.8rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+}
+
+.closeBtn:hover {
+  color: var(--text-main);
+}
+
+/* Body */
+.body {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.inputGroup label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+/* The wrapper handles the input + button integration */
+.inputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.inputWrapper input {
+  width: 100%;
+  background: #fffaf0;
+  border: 1px solid var(--border-color);
+  padding: 0.85rem 1rem;
+  padding-right: 3rem; /* Space for the button */
+  border-radius: 10px;
+  color: var(--text-main);
+  font-family: monospace;
+  font-size: 0.95rem;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.inputWrapper input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(218, 227, 100, 0.2);
+}
+
+.codeText {
+  letter-spacing: 2px;
+  font-weight: 600;
+}
+
+/* The button inside the input */
+.copyIconBtn {
+  position: absolute;
+  right: 8px;
+  background: #efe3ce;
+  border: none;
+  border-radius: 6px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-main);
+  transition: all 0.2s;
+}
+
+.copyIconBtn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.copyIconBtn:hover {
+  background: #e4d6bf;
+  color: var(--text-main);
+}
+
+.copyIconBtn.active {
+  background: rgba(60, 122, 74, 0.15);
+}
+
+/* Divider */
+.divider {
+  text-align: center;
+  position: relative;
+  margin: 0.5rem 0;
+}
+
+.divider::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 100%;
+  height: 1px;
+  background: var(--border-color);
+  z-index: 1;
+}
+
+.divider span {
+  background: var(--bg-card);
+  position: relative;
+  z-index: 2;
+  padding: 0 10px;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+/* Social Row */
+.socialRow {
+  display: flex;
+  justify-content: center;
+  gap: 1.2rem;
+}
+
+.socialBtn {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  color: #ffffff;
+}
+
+.socialBtn svg {
+  width: 22px;
+  height: 22px;
+}
+
+.socialBtn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(30, 27, 22, 0.2);
+}
+
+/* Brand Colors */
+.wa { background: #25D366; }
+.wa:hover { background: #1ebc57; }
+
+.em { background: #ea4335; }
+.em:hover { background: #d62516; }
+
+.tw { background: #000; border: 1px solid #333; }
+.tw:hover { background: #111; border-color: #555; }
+
+.fb { background: #1877F2; }
+.fb:hover { background: #166fe5; }
+
+/* Mobile Optimization */
+@media (max-width: 480px) {
+  .compactModalContent {
+    max-width: 90%;
+    margin: 20px auto;
+  }
+}
+

@@ -1,0 +1,166 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1.5rem 0;
+  width: 100%;
+}
+
+/* --- Row 1: Header & Date --- */
+.headerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.textGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 800;
+  margin: 0;
+  color: #f8fafc;
+  letter-spacing: -0.03em;
+  /* Modern Text Gradient */
+  background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.subtitle {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.dateBadge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.8rem;
+  background: rgba(30, 41, 59, 0.5);
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  border-radius: 10px;
+  color: #cbd5e1;
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* --- Row 2: Controls --- */
+.controlsRow {
+  display: flex;
+  align-items: center;
+}
+
+/* Segmented Control (The iOS style switch) */
+.segmentedControl {
+  display: flex;
+  background: #0f172a; /* Darker background */
+  padding: 4px;
+  border-radius: 12px;
+  border: 1px solid #1e293b;
+  position: relative;
+}
+
+.segmentBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0.6rem 1.5rem;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: #64748b;
+  font-weight: 600;
+  font-size: 0.9rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  z-index: 1;
+}
+
+.segmentBtn:hover {
+  color: #94a3b8;
+}
+
+/* Active State Design */
+.active {
+  background: #1e293b;
+  color: #f8fafc;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  /* The "Glow" effect */
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.badge, .badgeGray {
+  font-size: 0.75rem;
+  padding: 2px 6px;
+  border-radius: 6px;
+  min-width: 18px;
+  line-height: 1.2;
+}
+
+.badge {
+  background: #3b82f6;
+  color: white;
+}
+
+.badgeGray {
+  background: #334155;
+  color: #cbd5e1;
+}
+
+/* --- MOBILE RESPONSIVENESS (Max Width 600px) --- */
+@media (max-width: 600px) {
+  .container {
+    gap: 1.2rem;
+    padding: 1rem 0;
+  }
+
+  /* 1. Stack the header, but keep date next to title if possible, 
+     or hide subtitle to save space */
+  .headerRow {
+    align-items: center;
+  }
+
+  .title {
+    font-size: 1.5rem; /* Smaller title */
+  }
+
+  .subtitle {
+    display: none; /* Hide subtitle on mobile to save vertical space */
+  }
+
+  .dateBadge {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.8rem;
+    background: transparent; /* Cleaner look on mobile */
+    border: none;
+  }
+
+  /* 2. Make the tabs full width (Segmented Control) */
+  .controlsRow {
+    width: 100%;
+  }
+
+  .segmentedControl {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Split 50/50 */
+    width: 100%;
+    padding: 3px;
+  }
+
+  .segmentBtn {
+    width: 100%;
+    padding: 0.7rem 0; /* Taller touch target */
+    font-size: 0.95rem; /* Readable font */
+  }
+}

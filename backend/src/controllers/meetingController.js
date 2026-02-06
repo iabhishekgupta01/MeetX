@@ -50,6 +50,8 @@ exports.uploadMeetingAudio = async (req, res) => {
 
     const transcript = await transcribeAudio(wavPath);
     console.log("WHISPER DONE");
+    console.log("TRANSCRIPT LENGTH:", transcript.length, "chars");
+    console.log("TRANSCRIPT PREVIEW:", transcript.substring(0, 200));
 
     let meetingData;
     try {
