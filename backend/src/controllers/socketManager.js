@@ -10,6 +10,25 @@ let usernames = {}; // storing username for each socket.id
 let socketToMeeting = {}; // mapping socket.id to meetingId
 let socketToUserId = {}; // mapping socket.id to userId
 
+const isMeetingExpired = (meeting) => {
+    if (!meeting) return true;
+    if (!meeting.isActive) return true;
+    return new Date() > new Date(meeting.expiresAt);
+};
+
+const finalizeMeeting = async (meeting) => {
+    if (!meeting || !meeting.isActive) return meeting;
+    meeting.endedAt = new Date();
+    meeting.isActive = false;
+    meeting.expiresAt = new Date();
+    if (!meeting.startedAt) {
+        meeting.startedAt = meeting.createdAt || new Date();
+    }
+    meeting.duration = Math.floor((meeting.endedAt - meeting.startedAt) / 1000);
+    await meeting.save();
+    return meeting;
+};
+
 
 
 module.exports = (server) => {
@@ -32,6 +51,19 @@ module.exports = (server) => {
             try {
                 const { meetingId, userId, username } = meetingData;
 
+                if (!meetingId) {
+                    socket.emit("meeting-ended", { reason: "missing-meeting" });
+                    socket.disconnect(true);
+                    return;
+                }
+
+                const meeting = await Meeting.findOne({ meetingId });
+                if (!meeting || isMeetingExpired(meeting)) {
+                    socket.emit("meeting-ended", { reason: "ended" });
+                    socket.disconnect(true);
+                    return;
+                }
+
                 // Store mappings
                 socketToMeeting[socket.id] = meetingId;
                 socketToUserId[socket.id] = userId;
@@ -47,24 +79,24 @@ module.exports = (server) => {
                 timeOnline[socket.id] = new Date();
 
                 // Update meeting in database
-                const meeting = await Meeting.findOne({ meetingId });
-                if (meeting) {
-                    const participantIndex = meeting.participants.findIndex(p => p.userId === userId);
-                    if (participantIndex === -1) {
-                        meeting.participants.push({
-                            userId,
-                            username,
-                            joinedAt: new Date()
-                        });
-                        await meeting.save();
-                    } else if (meeting.participants[participantIndex].username !== username) {
-                        meeting.participants[participantIndex].username = username;
-                        await meeting.save();
+                const participantIndex = meeting.participants.findIndex(p => p.userId === userId);
+                if (participantIndex === -1) {
+                    meeting.participants.push({
+                        userId,
+                        username,
+                        joinedAt: new Date()
+                    });
+                    if (!meeting.startedAt) {
+                        meeting.startedAt = new Date();
                     }
-                    
-                    // Emit meeting object to all participants
-                    io.to(meetingId).emit("meeting-updated", meeting);
+                    await meeting.save();
+                } else if (meeting.participants[participantIndex].username !== username) {
+                    meeting.participants[participantIndex].username = username;
+                    await meeting.save();
                 }
+                
+                // Emit meeting object to all participants
+                io.to(meetingId).emit("meeting-updated", meeting);
 
                 const clientsPayload = connections[meetingId].map((socketId) => ({
                     socketId,
@@ -88,6 +120,153 @@ module.exports = (server) => {
         socket.on("signal", (toId, msg) => {
             const senderName = usernames[socket.id] || "User";
             io.to(toId).emit("signal", socket.id, msg, senderName);
+        });
+
+        socket.on("admin-end-meeting", async (payload) => {
+            try {
+                const { meetingId, userId } = payload || {};
+                if (!meetingId || !userId) {
+                    socket.emit("admin-action-error", { message: "Invalid admin payload" });
+                    return;
+                }
+
+                const meeting = await Meeting.findOne({ meetingId });
+                if (!meeting) {
+                    socket.emit("admin-action-error", { message: "Meeting not found" });
+                    return;
+                }
+
+                if (meeting.hostId !== userId) {
+                    socket.emit("admin-action-error", { message: "Not authorized" });
+                    return;
+                }
+
+                await finalizeMeeting(meeting);
+                io.to(meetingId).emit("meeting-ended", { reason: "host-ended" });
+
+                const roomSockets = connections[meetingId] ? [...connections[meetingId]] : [];
+                roomSockets.forEach((socketId) => {
+                    io.to(socketId).emit("force-removed", { reason: "meeting-ended" });
+                    const targetSocket = io.sockets.sockets.get(socketId);
+                    if (targetSocket) {
+                        targetSocket.disconnect(true);
+                    }
+                });
+                delete connections[meetingId];
+            } catch (error) {
+                console.error("Error ending meeting via admin:", error);
+                socket.emit("admin-action-error", { message: "Failed to end meeting" });
+            }
+        });
+
+        socket.on("admin-mute-user", async (payload) => {
+            try {
+                const { meetingId, userId, targetSocketId } = payload || {};
+                if (!meetingId || !userId || !targetSocketId) {
+                    socket.emit("admin-action-error", { message: "Invalid admin payload" });
+                    return;
+                }
+
+                const meeting = await Meeting.findOne({ meetingId });
+                if (!meeting || meeting.hostId !== userId) {
+                    socket.emit("admin-action-error", { message: "Not authorized" });
+                    return;
+                }
+
+                io.to(targetSocketId).emit("force-mute", { reason: "admin" });
+                io.to(meetingId).emit("peer-muted", { socketId: targetSocketId });
+            } catch (error) {
+                console.error("Error muting user via admin:", error);
+                socket.emit("admin-action-error", { message: "Failed to mute user" });
+            }
+        });
+
+        socket.on("admin-unmute-user", async (payload) => {
+            try {
+                const { meetingId, userId, targetSocketId } = payload || {};
+                if (!meetingId || !userId || !targetSocketId) {
+                    socket.emit("admin-action-error", { message: "Invalid admin payload" });
+                    return;
+                }
+
+                const meeting = await Meeting.findOne({ meetingId });
+                if (!meeting || meeting.hostId !== userId) {
+                    socket.emit("admin-action-error", { message: "Not authorized" });
+                    return;
+                }
+
+                io.to(targetSocketId).emit("force-unmute", { reason: "admin" });
+                io.to(meetingId).emit("peer-unmuted", { socketId: targetSocketId });
+            } catch (error) {
+                console.error("Error unmuting user via admin:", error);
+                socket.emit("admin-action-error", { message: "Failed to unmute user" });
+            }
+        });
+
+        socket.on("peer-unmuted", (payload) => {
+            try {
+                const { meetingId, socketId } = payload || {};
+                if (!meetingId || !socketId) return;
+                io.to(meetingId).emit("peer-unmuted", { socketId });
+            } catch (error) {
+                console.error("Error handling peer unmute:", error);
+            }
+        });
+
+        socket.on("peer-muted", (payload) => {
+            try {
+                const { meetingId, socketId } = payload || {};
+                if (!meetingId || !socketId) return;
+                io.to(meetingId).emit("peer-muted", { socketId });
+            } catch (error) {
+                console.error("Error handling peer mute:", error);
+            }
+        });
+
+        socket.on("admin-remove-user", async (payload) => {
+            try {
+                const { meetingId, userId, targetSocketId } = payload || {};
+                if (!meetingId || !userId || !targetSocketId) {
+                    socket.emit("admin-action-error", { message: "Invalid admin payload" });
+                    return;
+                }
+
+                const meeting = await Meeting.findOne({ meetingId });
+                if (!meeting || meeting.hostId !== userId) {
+                    socket.emit("admin-action-error", { message: "Not authorized" });
+                    return;
+                }
+
+                io.to(targetSocketId).emit("force-removed", { reason: "removed-by-admin" });
+                const targetSocket = io.sockets.sockets.get(targetSocketId);
+                if (targetSocket) {
+                    targetSocket.disconnect(true);
+                }
+
+                if (connections[meetingId]) {
+                    connections[meetingId] = connections[meetingId].filter((id) => id !== targetSocketId);
+                    connections[meetingId].forEach((id) => io.to(id).emit("user-left", targetSocketId));
+                    if (connections[meetingId].length === 0) {
+                        delete connections[meetingId];
+                    }
+                }
+
+                const targetUserId = socketToUserId[targetSocketId];
+                if (targetUserId) {
+                    const participantIndex = meeting.participants.findIndex(p => p.userId === targetUserId);
+                    if (participantIndex !== -1) {
+                        meeting.participants[participantIndex].leftAt = new Date();
+                        meeting.participants[participantIndex].duration = Math.floor(
+                            (meeting.participants[participantIndex].leftAt - meeting.participants[participantIndex].joinedAt) / 1000
+                        );
+                        await meeting.save();
+                        io.to(meetingId).emit("meeting-updated", meeting);
+                    }
+                }
+            } catch (error) {
+                console.error("Error removing user via admin:", error);
+                socket.emit("admin-action-error", { message: "Failed to remove user" });
+            }
         });
 
         socket.on("chat-message", (data, sender) => {

@@ -22,19 +22,54 @@ const Icons = {
   EndCall: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M10.68 13.31a16 16 0 0 0 3.41 2.6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7 2 2 0 0 1 1.72 2v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.42 19.42 0 0 1-3.33-2.67m-2.67-3.34a19.79 19.79 0 0 1-3.07-8.63A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91"/><line x1="23" y1="1" x2="1" y2="23"/></svg>,
   Lock: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>,
   Copy: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>,
-  Check: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+  Check: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>,
+  UserX: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="8.5" cy="7" r="4" /><line x1="18" y1="8" x2="23" y2="13" /><line x1="23" y1="8" x2="18" y2="13" /></svg>
 };
 
-const VideoPlayer = ({ stream, username, isLocal = false, isActive = false }) => {
+const VideoPlayer = ({
+  stream,
+  username,
+  isLocal = false,
+  isActive = false,
+  isMuted = false,
+  showAdminControls = false,
+  onAdminToggleMute,
+  onAdminRemove
+}) => {
   const videoRef = useRef(null);
   useEffect(() => {
-    if (videoRef.current && stream) videoRef.current.srcObject = stream;
+    if (videoRef.current && stream) {
+      videoRef.current.srcObject = stream;
+      const playPromise = videoRef.current.play();
+      if (playPromise && typeof playPromise.catch === "function") {
+        playPromise.catch(() => {});
+      }
+    }
   }, [stream]);
 
   return (
     <div className={`${styles.videoTile} ${isLocal ? styles.localVideoFloating : ""} ${isActive ? styles.activeSpeaker : ""}`}>
       <video ref={videoRef} autoPlay playsInline muted={isLocal} />
       <span className={isLocal ? styles.localNameTag : styles.nameTag}>{username || "User"} {isLocal && "(You)"}</span>
+      {isMuted && !isLocal && (
+        <div className={styles.mutedBadge} title="Muted">
+          <Icons.MicOff />
+        </div>
+      )}
+      {showAdminControls && !isLocal && (
+        <div className={styles.adminControls}>
+          <button
+            className={styles.adminBtn}
+            onClick={onAdminToggleMute}
+            title={isMuted ? "Unmute user" : "Mute user"}
+          >
+            {isMuted ? <Icons.Mic /> : <Icons.MicOff />}
+          </button>
+          <button className={`${styles.adminBtn} ${styles.adminBtnDanger}`} onClick={onAdminRemove} title="Remove user">
+            <Icons.UserX />
+          </button>
+        </div>
+      )}
     </div>
   );
 };
@@ -48,6 +83,7 @@ function VideoMeetComponent() {
   const [meetingId, setMeetingId] = useState("");
   const [username, setUsername] = useState("");
   const [isInLobby, setIsInLobby] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
   
   // URL & Validation
   const urlMeetingId = routeMeetingId || searchParams.get("id");
@@ -65,6 +101,11 @@ function VideoMeetComponent() {
   const [transcript, setTranscript] = useState("");
   const [activeSpeakerId, setActiveSpeakerId] = useState("local");
   const [codeCopied, setCodeCopied] = useState(false);
+  const [mutedPeers, setMutedPeers] = useState({});
+  const [removeTarget, setRemoveTarget] = useState(null);
+  const [endModal, setEndModal] = useState(null);
+  const [endConfirmOpen, setEndConfirmOpen] = useState(false);
+  const [muteNotice, setMuteNotice] = useState(null);
 
   // WebRTC
   const [peers, setPeers] = useState([]);
@@ -72,6 +113,8 @@ function VideoMeetComponent() {
   const connectionsRef = useRef({});
   const localStreamRef = useRef(null);
   const audioMonitorRef = useRef({});
+  const localUserIdRef = useRef(localStorage.getItem("userId") || "guest");
+  const meetingEndRef = useRef(false);
 
   const orderedPeers = (() => {
     const list = [...peers];
@@ -92,9 +135,21 @@ function VideoMeetComponent() {
         const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
         localStreamRef.current = stream;
         setLocalStream(stream);
-        setVideoEnabled(stream.getVideoTracks()[0].enabled);
-        setAudioEnabled(stream.getAudioTracks()[0].enabled);
-      } catch (err) { console.error("Media Error:", err); }
+        setVideoEnabled(stream.getVideoTracks()[0]?.enabled ?? true);
+        setAudioEnabled(stream.getAudioTracks()[0]?.enabled ?? true);
+      } catch (err) {
+        console.error("Media Error:", err);
+        // Fallback: try video-only if audio device is unavailable
+        try {
+          const videoOnlyStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+          localStreamRef.current = videoOnlyStream;
+          setLocalStream(videoOnlyStream);
+          setVideoEnabled(videoOnlyStream.getVideoTracks()[0]?.enabled ?? true);
+          setAudioEnabled(false);
+        } catch (videoErr) {
+          console.error("Video-only Media Error:", videoErr);
+        }
+      }
     };
     initMedia();
 
@@ -111,6 +166,7 @@ function VideoMeetComponent() {
             setMeetingCode(response.data.meeting.meetingCode || "");
             setIsLocked(true); // Lock it only on success
             setLinkError(null);
+          setIsAdmin(response.data.meeting.hostId === localUserIdRef.current);
         } 
       } catch (error) {
         console.error("API Error:", error);
@@ -152,7 +208,7 @@ function VideoMeetComponent() {
       let sum = 0;
       for (let i = 0; i < data.length; i += 1) sum += data[i];
       const avg = sum / data.length;
-      if (avg > 25) {
+      if (avg > 25 && !mutedPeers[id]) {
         setActiveSpeakerId(id);
       }
       audioMonitorRef.current[id].rafId = requestAnimationFrame(tick);
@@ -176,6 +232,7 @@ function VideoMeetComponent() {
       setMeetingCode(response.data.meeting.meetingCode || code);
       setIsLocked(true);
       setLinkError(null);
+      setIsAdmin(response.data.meeting.hostId === localUserIdRef.current);
       return response.data.meeting.meetingId;
     }
 
@@ -209,7 +266,7 @@ function VideoMeetComponent() {
     socketRef.current = io(serverUrl);
 
     socketRef.current.on("connect", () => {
-      const userId = localStorage.getItem("userId") || "guest";
+      const userId = localUserIdRef.current;
       console.log("Socket Connected!", socketRef.current.id);
       // IMPORTANT: This event name must match your Backend
       socketRef.current.emit("join-call", { meetingId: resolvedMeetingId, username, userId });
@@ -270,6 +327,13 @@ function VideoMeetComponent() {
         if (connectionsRef.current[id]) connectionsRef.current[id].close();
         delete connectionsRef.current[id];
         setPeers((prev) => prev.filter((p) => p.socketId !== id));
+        setMutedPeers((prev) => {
+          if (!prev[id]) return prev;
+          const next = { ...prev };
+          delete next[id];
+          return next;
+        });
+        setRemoveTarget((prev) => (prev?.socketId === id ? null : prev));
         if (audioMonitorRef.current[id]) {
           const monitor = audioMonitorRef.current[id];
           if (monitor.rafId) cancelAnimationFrame(monitor.rafId);
@@ -278,6 +342,68 @@ function VideoMeetComponent() {
           }
           delete audioMonitorRef.current[id];
         }
+    });
+
+    socketRef.current.on("peer-muted", ({ socketId }) => {
+      if (!socketId) return;
+      setMutedPeers((prev) => ({ ...prev, [socketId]: true }));
+    });
+
+    socketRef.current.on("peer-unmuted", ({ socketId }) => {
+      if (!socketId) return;
+      setMutedPeers((prev) => {
+        if (!prev[socketId]) return prev;
+        const next = { ...prev };
+        delete next[socketId];
+        return next;
+      });
+    });
+
+    socketRef.current.on("meeting-ended", () => {
+      if (meetingEndRef.current) return;
+      meetingEndRef.current = true;
+      endCall({ message: "Meeting ended by host.", showModal: true });
+    });
+
+    socketRef.current.on("force-mute", () => {
+      if (localStreamRef.current) {
+        const t = localStreamRef.current.getAudioTracks()[0];
+        if (t) {
+          t.enabled = false;
+          setAudioEnabled(false);
+          if (activeSpeakerId === "local") {
+            setActiveSpeakerId(null);
+          }
+        }
+      }
+      setMuteNotice("Muted by host");
+      window.setTimeout(() => setMuteNotice(null), 2000);
+    });
+
+    socketRef.current.on("force-unmute", () => {
+      if (localStreamRef.current) {
+        const t = localStreamRef.current.getAudioTracks()[0];
+        if (t) {
+          t.enabled = true;
+          setAudioEnabled(true);
+          if (socketRef.current && meetingId) {
+            socketRef.current.emit("peer-unmuted", {
+              meetingId,
+              socketId: socketRef.current.id
+            });
+          }
+        }
+      }
+    });
+
+    socketRef.current.on("force-removed", () => {
+      if (meetingEndRef.current) return;
+      meetingEndRef.current = true;
+      endCall({ message: "You were removed from the meeting.", showModal: true });
+    });
+
+    socketRef.current.on("admin-action-error", (payload) => {
+      alert(payload?.message || "Admin action failed.");
     });
     setIsJoining(false);
   };
@@ -316,7 +442,19 @@ function VideoMeetComponent() {
   const toggleAudio = () => {
     if (localStreamRef.current) {
         const t = localStreamRef.current.getAudioTracks()[0];
-        if (t) { t.enabled = !t.enabled; setAudioEnabled(t.enabled); }
+        if (t) {
+          t.enabled = !t.enabled;
+          setAudioEnabled(t.enabled);
+          if (!t.enabled && activeSpeakerId === "local") {
+            setActiveSpeakerId(null);
+          }
+          if (socketRef.current && socketRef.current.id && meetingId) {
+            socketRef.current.emit(t.enabled ? "peer-unmuted" : "peer-muted", {
+              meetingId,
+              socketId: socketRef.current.id
+            });
+          }
+        }
     }
   };
   const toggleVideo = () => {
@@ -342,18 +480,131 @@ function VideoMeetComponent() {
       } else { stopScreenSharing(); }
   };
   const stopScreenSharing = async () => {
-      const stream = await navigator.mediaDevices.getUserMedia({video:true, audio:true});
-      localStreamRef.current = stream;
-      startAudioMonitor(stream, "local");
-      const track = stream.getVideoTracks()[0];
-      Object.values(connectionsRef.current).forEach(pc => {
-          const sender = pc.getSenders().find(s => s.track.kind === 'video');
-          if(sender) sender.replaceTrack(track);
-      });
-      setLocalStream(stream);
-      setIsScreenSharing(false);
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        localStreamRef.current = stream;
+        startAudioMonitor(stream, "local");
+        const track = stream.getVideoTracks()[0];
+        Object.values(connectionsRef.current).forEach(pc => {
+            const sender = pc.getSenders().find(s => s.track.kind === 'video');
+            if(sender) sender.replaceTrack(track);
+        });
+        setLocalStream(stream);
+        setIsScreenSharing(false);
+      } catch (err) {
+        console.error("Media Error:", err);
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+          localStreamRef.current = stream;
+          const track = stream.getVideoTracks()[0];
+          Object.values(connectionsRef.current).forEach(pc => {
+              const sender = pc.getSenders().find(s => s.track.kind === 'video');
+              if(sender) sender.replaceTrack(track);
+          });
+          setLocalStream(stream);
+          setAudioEnabled(false);
+          setIsScreenSharing(false);
+        } catch (videoErr) {
+          console.error("Video-only Media Error:", videoErr);
+        }
+      }
   };
-  const endCall = () => { socketRef.current?.disconnect(); window.location.href = "/"; };
+  const endCall = async ({ message, showModal = false } = {}) => {
+    if (showModal && message) {
+      socketRef.current?.disconnect();
+      setEndModal({
+        title: meetingEndRef.current ? "Meeting ended" : "Call ended",
+        message,
+        actionLabel: "Back to home"
+      });
+      return;
+    }
+
+    if (isAdmin && meetingId && !meetingEndRef.current) {
+      meetingEndRef.current = true;
+      try {
+        await axios.post(`${serverUrl}/api/v1/meeting/end`, {
+          meetingId,
+          transcript
+        });
+      } catch (error) {
+        console.error("Failed to end meeting:", error);
+      }
+      socketRef.current?.emit("admin-end-meeting", {
+        meetingId,
+        userId: localUserIdRef.current
+      });
+    }
+
+    socketRef.current?.disconnect();
+    window.location.href = "/";
+  };
+
+  const adminMuteUser = (socketId) => {
+    if (!socketRef.current || !meetingId) return;
+    setMutedPeers((prev) => ({ ...prev, [socketId]: true }));
+    socketRef.current.emit("admin-mute-user", {
+      meetingId,
+      userId: localUserIdRef.current,
+      targetSocketId: socketId
+    });
+  };
+
+  const adminUnmuteUser = (socketId) => {
+    if (!socketRef.current || !meetingId) return;
+    setMutedPeers((prev) => {
+      if (!prev[socketId]) return prev;
+      const next = { ...prev };
+      delete next[socketId];
+      return next;
+    });
+    socketRef.current.emit("admin-unmute-user", {
+      meetingId,
+      userId: localUserIdRef.current,
+      targetSocketId: socketId
+    });
+  };
+
+  const adminRemoveUser = (socketId, name) => {
+    if (!socketRef.current || !meetingId) return;
+    setRemoveTarget({ socketId, name });
+  };
+
+  const confirmRemoveUser = () => {
+    if (!socketRef.current || !meetingId || !removeTarget) return;
+    socketRef.current.emit("admin-remove-user", {
+      meetingId,
+      userId: localUserIdRef.current,
+      targetSocketId: removeTarget.socketId
+    });
+    setRemoveTarget(null);
+  };
+
+  const cancelRemoveUser = () => {
+    setRemoveTarget(null);
+  };
+
+  const closeEndModal = () => {
+    setEndModal(null);
+    window.location.href = "/";
+  };
+
+  const openEndConfirm = () => {
+    setEndConfirmOpen(true);
+  };
+
+  const cancelEndConfirm = () => {
+    setEndConfirmOpen(false);
+  };
+
+  const confirmEndMeeting = () => {
+    setEndConfirmOpen(false);
+    endCall();
+  };
+
+  const clearMuteNotice = () => {
+    setMuteNotice(null);
+  };
   const copyMeetingCode = async () => {
     const code = meetingCode?.trim();
     if (!code) return;
@@ -377,7 +628,24 @@ function VideoMeetComponent() {
 
             <div className={styles.previewWrapper}>
               <div className={styles.lobbyPreview}>
-                {localStream ? <video ref={r => { if(r) r.srcObject = localStream }} autoPlay muted playsInline /> : <div className={styles.loader}>Camera Loading...</div>}
+                {localStream ? (
+                  <video
+                    ref={(r) => {
+                      if (r && localStream) {
+                        r.srcObject = localStream;
+                        const playPromise = r.play();
+                        if (playPromise && typeof playPromise.catch === "function") {
+                          playPromise.catch(() => {});
+                        }
+                      }
+                    }}
+                    autoPlay
+                    muted
+                    playsInline
+                  />
+                ) : (
+                  <div className={styles.loader}>Camera Loading...</div>
+                )}
                 <div className={styles.previewOverlay}>
                     <button onClick={toggleAudio} className={`${styles.miniToggle} ${!audioEnabled ? styles.off : ''}`}>{audioEnabled ? <Icons.Mic /> : <Icons.MicOff />}</button>
                     <button onClick={toggleVideo} className={`${styles.miniToggle} ${!videoEnabled ? styles.off : ''}`}>{videoEnabled ? <Icons.Video /> : <Icons.VideoOff />}</button>
@@ -454,14 +722,22 @@ function VideoMeetComponent() {
                 stream={localStream}
                 username={username}
                 isLocal={true}
-                isActive={activeSpeakerId === "local"}
+                isActive={activeSpeakerId === "local" && audioEnabled}
               />
               {orderedPeers.map((p) => (
                 <VideoPlayer
                   key={p.socketId}
                   stream={p.stream}
                   username={p.username}
-                  isActive={activeSpeakerId === p.socketId}
+                  isActive={activeSpeakerId === p.socketId && !mutedPeers[p.socketId]}
+                  isMuted={!!mutedPeers[p.socketId]}
+                  showAdminControls={isAdmin}
+                  onAdminToggleMute={() =>
+                    mutedPeers[p.socketId]
+                      ? adminUnmuteUser(p.socketId)
+                      : adminMuteUser(p.socketId)
+                  }
+                  onAdminRemove={() => adminRemoveUser(p.socketId, p.username)}
                 />
               ))}
             </div>
@@ -473,8 +749,108 @@ function VideoMeetComponent() {
              <button onClick={handleScreenShare} className={`${styles.iconBtn} ${isScreenSharing ? styles.active : ''}`}><Icons.ScreenShare /></button>
              <div className={styles.sep}></div>
              <MeetingRecorder transcript={transcript} setTranscript={setTranscript} isRecording={isRecording} setIsRecording={setIsRecording}/>
-             <button onClick={endCall} className={`${styles.iconBtn} ${styles.endCallBtn}`}><Icons.EndCall /></button>
+             <button
+               onClick={() => {
+                 if (isAdmin) {
+                   openEndConfirm();
+                   return;
+                 }
+                 endCall();
+               }}
+               className={`${styles.iconBtn} ${styles.endCallBtn}`}
+             >
+               <Icons.EndCall />
+             </button>
           </div>
+
+          {removeTarget && (
+            <div
+              className={styles.modalBackdrop}
+              role="presentation"
+              onClick={cancelRemoveUser}
+            >
+              <div
+                className={styles.removeModalCard}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="remove-title"
+                onClick={(event) => event.stopPropagation()}
+              >
+                <div className={styles.removeModalHeader}>
+                  <div className={styles.removeModalIcon} aria-hidden="true">
+                    <Icons.UserX />
+                  </div>
+                  <h3 id="remove-title">Remove participant?</h3>
+                </div>
+                <p className={styles.removeModalText}>
+                  {removeTarget.name || "This participant"} will be removed from the meeting.
+                </p>
+                <div className={styles.removeModalActions}>
+                  <button className={styles.modalBtn} onClick={cancelRemoveUser}>Cancel</button>
+                  <button className={`${styles.modalBtn} ${styles.modalBtnDanger}`} onClick={confirmRemoveUser}>Remove</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {endModal && (
+            <div className={styles.modalBackdrop} role="presentation" onClick={closeEndModal}>
+              <div
+                className={styles.endModalCard}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="end-title"
+                onClick={(event) => event.stopPropagation()}
+              >
+                <div className={styles.endModalIcon} aria-hidden="true">
+                  <Icons.EndCall />
+                </div>
+                <h3 id="end-title" className={styles.endModalTitle}>{endModal.title}</h3>
+                <p className={styles.endModalText}>{endModal.message}</p>
+                <button className={styles.endModalAction} onClick={closeEndModal}>
+                  {endModal.actionLabel}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {endConfirmOpen && (
+            <div className={styles.modalBackdrop} role="presentation" onClick={cancelEndConfirm}>
+              <div
+                className={styles.endConfirmCard}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="end-confirm-title"
+                onClick={(event) => event.stopPropagation()}
+              >
+                <div className={styles.endConfirmHeader}>
+                  <div className={styles.endConfirmIcon} aria-hidden="true">
+                    <Icons.EndCall />
+                  </div>
+                  <h3 id="end-confirm-title">End meeting for everyone?</h3>
+                </div>
+                <p className={styles.endConfirmText}>
+                  This will disconnect all participants and close the meeting.
+                </p>
+                <div className={styles.endConfirmActions}>
+                  <button className={styles.modalBtn} onClick={cancelEndConfirm}>Cancel</button>
+                  <button className={`${styles.modalBtn} ${styles.modalBtnDanger}`} onClick={confirmEndMeeting}>End now</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {muteNotice && (
+            <div className={styles.toast} role="status" aria-live="polite">
+              <span className={styles.toastIcon} aria-hidden="true">
+                <Icons.MicOff />
+              </span>
+              <span className={styles.toastText}>{muteNotice}</span>
+              <button className={styles.toastClose} onClick={clearMuteNotice} aria-label="Dismiss">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>

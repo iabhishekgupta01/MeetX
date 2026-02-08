@@ -382,6 +382,336 @@
   transform: scaleX(-1);
 }
 
+.adminControls {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.55);
+  padding: 6px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(8px);
+}
+
+.adminBtn {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.adminBtn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.adminBtn:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.adminBtnDanger {
+  background: rgba(255, 59, 48, 0.2);
+  color: var(--danger);
+}
+
+.adminBtnDanger:hover {
+  background: rgba(255, 59, 48, 0.35);
+}
+
+.mutedBadge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(255, 59, 48, 0.25);
+  color: var(--danger);
+  border: 1px solid rgba(255, 59, 48, 0.35);
+  backdrop-filter: blur(6px);
+}
+
+.mutedBadge svg {
+  width: 16px;
+  height: 16px;
+}
+
+.modalBackdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+}
+
+.removeModalCard {
+  width: min(360px, 92vw);
+  background: linear-gradient(160deg, rgba(22, 22, 22, 0.98), rgba(8, 8, 8, 0.95));
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 18px;
+  padding: 18px;
+  color: #fff;
+  box-shadow: 0 22px 55px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(12px);
+  animation: scaleIn 0.25s ease-out;
+}
+
+.removeModalHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.removeModalIcon {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: rgba(255, 0, 153, 0.12);
+  border: 1px solid rgba(255, 0, 153, 0.35);
+  color: var(--pink-neon);
+  box-shadow: 0 0 14px var(--pink-glow);
+}
+
+.removeModalIcon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.removeModalHeader h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.removeModalText {
+  margin: 0 0 14px;
+  color: var(--text-muted);
+  font-size: 0.92rem;
+}
+
+.removeModalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.modalBtn {
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.modalBtn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  transform: translateY(-1px);
+}
+
+.modalBtnDanger {
+  background: rgba(255, 59, 48, 0.18);
+  color: var(--danger);
+  border-color: rgba(255, 59, 48, 0.4);
+}
+
+.modalBtnDanger:hover {
+  background: rgba(255, 59, 48, 0.32);
+}
+
+.endModalCard {
+  width: min(360px, 92vw);
+  background: linear-gradient(160deg, rgba(22, 22, 22, 0.98), rgba(8, 8, 8, 0.95));
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 18px;
+  padding: 20px 18px;
+  color: #fff;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(12px);
+  text-align: center;
+  animation: scaleIn 0.25s ease-out;
+}
+
+.endModalIcon {
+  width: 50px;
+  height: 50px;
+  margin: 0 auto 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(255, 0, 153, 0.12);
+  border: 1px solid rgba(255, 0, 153, 0.35);
+  color: var(--pink-neon);
+  box-shadow: 0 0 18px var(--pink-glow);
+}
+
+.endModalIcon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.endModalTitle {
+  margin: 0 0 6px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.4px;
+}
+
+.endModalText {
+  margin: 0 0 14px;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+.endModalAction {
+  width: 100%;
+  border: none;
+  border-radius: 10px;
+  padding: 9px 12px;
+  background: var(--lime-neon);
+  color: #000;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 4px 14px var(--lime-glow);
+}
+
+.endModalAction:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px var(--lime-glow);
+}
+
+.endConfirmCard {
+  width: min(360px, 92vw);
+  background: linear-gradient(160deg, rgba(20, 20, 20, 0.98), rgba(10, 10, 10, 0.96));
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 18px;
+  padding: 18px;
+  color: #fff;
+  box-shadow: 0 22px 55px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(12px);
+  animation: scaleIn 0.25s ease-out;
+}
+
+.endConfirmHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.endConfirmIcon {
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  background: rgba(255, 0, 153, 0.12);
+  border: 1px solid rgba(255, 0, 153, 0.35);
+  color: var(--pink-neon);
+  box-shadow: 0 0 14px var(--pink-glow);
+  flex: 0 0 auto;
+}
+
+.endConfirmIcon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.endConfirmHeader h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.endConfirmText {
+  margin: 0 0 14px;
+  color: var(--text-muted);
+  font-size: 0.92rem;
+}
+
+.endConfirmActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.toast {
+  position: absolute;
+  right: 18px;
+  bottom: 110px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(15, 15, 15, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  padding: 8px 12px 8px 10px;
+  color: #fff;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(10px);
+  z-index: 210;
+  animation: scaleIn 0.2s ease-out;
+}
+
+.toastIcon {
+  width: 26px;
+  height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(255, 59, 48, 0.18);
+  color: var(--danger);
+  border: 1px solid rgba(255, 59, 48, 0.35);
+}
+
+.toastIcon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.toastText {
+  font-size: 0.9rem;
+  color: #f1f1f1;
+}
+
+.toastClose {
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 2px 6px;
+}
+
+.toastClose:hover {
+  color: #fff;
+}
+
 .codePill {
   margin-top: 1rem;
   background: rgba(255, 255, 255, 0.03);
