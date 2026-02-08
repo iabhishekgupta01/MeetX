@@ -1,485 +1,547 @@
-/* THEME: Electric Lime & Charcoal
-   Palette: 
-   - Bg: #0f0f11 (Dark Charcoal)
-   - Text: #f4f4f5 (Zinc White)
-   - Primary/Accent: #d9f99d (Greenish Yellow / Lime)
-   - Button Active: #bef264 (Vibrant Lime)
-   - Button Inactive/Red: #f87171 (Soft Red)
-*/
+/* =========================================
+   1. THEME VARIABLES & BASE SETUP
+   ========================================= */
+:root {
+  /* -- Palette -- */
+  --lime-neon: #d4ff00;       /* Primary Action / Brand */
+  --lime-glow: rgba(212, 255, 0, 0.15);
+  --pink-neon: #ff0099;       /* Secondary / Hangup */
+  --pink-glow: rgba(255, 0, 153, 0.2);
+  
+  /* -- Backgrounds -- */
+  --bg-void: #050505;         /* Deepest Black */
+  --bg-glass: rgba(20, 20, 20, 0.6); /* Frosted Glass */
+  --glass-border: rgba(255, 255, 255, 0.08);
+  
+  /* -- Text & Utility -- */
+  --text-main: #ffffff;
+  --text-muted: #888888;
+  --danger: #ff3b30;
+  --success: #34c759;
+}
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
-/* === 1. BASE SETUP & BACKGROUND === */
 .wrapper {
   height: 100vh;
   width: 100vw;
-  background-color: #050505; /* Almost black */
-  font-family: 'Inter', sans-serif;
-  color: #f4f4f5;
+  background-color: var(--bg-void);
+  /* Subtle ambient light mesh */
+  background-image: 
+    radial-gradient(circle at 5% 5%, rgba(212, 255, 0, 0.04) 0%, transparent 40%),
+    radial-gradient(circle at 95% 95%, rgba(255, 0, 153, 0.04) 0%, transparent 40%);
+  color: var(--text-main);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
   overflow: hidden;
-  position: relative;
-}
-
-/* Background Animated Blobs (Significantly reduced visibility) */
-.blob1, .blob2 {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(120px);
-  z-index: 0;
-  opacity: 0.05; /* Reduced from 0.25 to 0.05 for very subtle effect */
-  animation: float 20s infinite alternate ease-in-out;
-}
-
-.blob1 {
-  width: 600px; height: 600px;
-  background: #a3e635; /* Lime Green */
-  top: -100px; left: -100px;
-}
-
-.blob2 {
-  width: 500px; height: 500px;
-  background: #2dd4bf; /* Teal/Cyan */
-  bottom: -100px; right: -100px;
-  animation-delay: -5s;
-}
-
-@keyframes float {
-  0% { transform: translate(0, 0); }
-  100% { transform: translate(30px, 50px); }
-}
-
-/* Glass Texture Overlay */
-.glassOverlay {
-  position: absolute;
-  top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(5, 5, 5, 0.85); /* Much darker overlay */
-  backdrop-filter: blur(30px); 
-  z-index: 1;
-  pointer-events: none;
-}
-
-/* === 2. LOBBY (PRE-JOIN SCREEN) === */
-.lobbyContainer {
-  position: relative;
-  z-index: 10;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 20px;
-}
-
-.lobbyCard {
-  /* Dark Glass Card */
-  background: rgba(30, 30, 35, 0.7); 
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
-  
-  width: 100%;
-  max-width: 400px;
-  padding: 2.5rem;
-  border-radius: 24px;
-  text-align: center;
-}
-
-.brandTitle {
-  font-size: 2.2rem;
-  font-weight: 800;
-  color: white;
-  margin-bottom: 0.5rem;
-  letter-spacing: -1px;
-}
-
-.accentText {
-  color: #bef264; /* Greenish Yellow Accent */
-}
-
-.subtitle {
-  color: #a1a1aa; /* Zinc 400 */
-  margin-bottom: 2rem;
-  font-weight: 400;
-}
-
-/* Preview Video Area */
-.previewContainer {
-  position: relative;
-  width: 100%;
-  margin-bottom: 2rem;
-}
-
-.videoFrame {
-  width: 100%;
-  aspect-ratio: 16/9;
-  background: #000;
-  border-radius: 18px;
-  overflow: hidden;
-  position: relative;
-  border: 1px solid rgba(255,255,255,0.08);
-  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-}
-
-.videoFrame video {
-  width: 100%; height: 100%;
-  object-fit: cover;
-  transform: scaleX(-1);
-}
-
-.hiddenVideo { opacity: 0; }
-
-.noCameraPlaceholder {
-  position: absolute;
-  top: 0; left: 0; width: 100%; height: 100%;
-  display: flex; align-items: center; justify-content: center;
-  background: #0a0a0a;
-  color: #52525b;
-  font-weight: 500;
-}
-
-.previewControls {
-  position: absolute;
-  bottom: -22px; 
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 16px;
-  background: #18181b;
-  padding: 8px 16px;
-  border-radius: 50px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.6);
-  border: 1px solid rgba(255,255,255,0.08);
-}
-
-.previewControls button {
-  width: 48px; height: 48px;
-  border-radius: 50%;
-  border: none;
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: all 0.2s;
-  color: #18181b; /* Dark icon color for better contrast on buttons */
-}
-
-/* Greenish Yellow for ON, Red for OFF */
-.btnOn {
-  background: #bef264; /* Lime */
-  box-shadow: 0 0 15px rgba(190, 242, 100, 0.2);
-}
-
-.btnOff {
-  background: #f87171; /* Soft Red */
-  box-shadow: 0 0 15px rgba(248, 113, 113, 0.2);
-}
-
-/* Form Inputs */
-.inputGroup {
-  text-align: left;
-  margin-bottom: 1.25rem;
-}
-
-.inputGroup label {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #d4d4d8;
-  margin-bottom: 8px;
-  display: block;
-  margin-left: 4px;
-}
-
-.inputGroup input {
-  width: 100%;
-  padding: 14px 16px;
-  border-radius: 14px;
-  border: 1px solid rgba(255,255,255,0.05);
-  background: rgba(20, 20, 23, 0.8);
-  color: white;
-  font-family: inherit;
-  font-size: 1rem;
-  transition: all 0.2s;
-}
-
-.inputGroup input:focus {
-  outline: none;
-  border-color: #bef264; /* Lime Focus */
-  background: rgba(20, 20, 23, 1);
-  box-shadow: 0 0 0 1px rgba(190, 242, 100, 0.2);
-}
-
-.inputGroup input::placeholder {
-    color: #52525b;
-}
-
-.primaryBtn {
-  width: 100%;
-  padding: 16px;
-  border-radius: 14px;
-  background: #bef264; /* Lime Background */
-  color: #1a2e05; /* Dark Green text for contrast */
-  border: none;
-  font-size: 1rem;
-  font-weight: 700;
-  cursor: pointer;
-  margin-top: 1.5rem;
-  transition: transform 0.1s, box-shadow 0.2s;
-}
-
-.primaryBtn:hover {
-  background: #a3e635;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(163, 230, 53, 0.15);
-}
-
-/* === 3. MEETING ROOM LAYOUT === */
-.roomContainer {
-  position: relative;
-  z-index: 10;
-  height: 100%;
   display: flex;
   flex-direction: column;
 }
 
-/* Top Bar */
-.topBar {
-  padding: 16px 24px;
+/* =========================================
+   2. LOBBY (COMPACT & GLASS)
+   ========================================= */
+.lobbyContainer {
+  flex: 1;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: center;
+  padding: 1rem;
 }
 
-.meetingInfo {
-  background: rgba(30, 30, 35, 0.6);
-  padding: 8px 16px;
-  border-radius: 10px;
+.lobbyCard {
+  width: 100%;
+  max-width: 360px; /* Kept tight and compact */
+  background: var(--bg-glass);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--glass-border);
+  border-radius: 24px;
+  padding: 1.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+  animation: floatUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* -- Branding -- */
+.logoText {
+  font-size: 2rem;
+  font-weight: 800;
+  text-align: center;
+  margin: 0;
+  color: #fff;
+  letter-spacing: -1.5px;
+}
+
+.logoX {
+  color: var(--lime-neon);
+  font-style: italic;
+  margin-left: 1px;
+  text-shadow: 0 0 20px var(--lime-glow);
+}
+
+/* -- Camera Preview -- */
+.previewWrapper {
+  position: relative;
+  width: 100%;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid var(--glass-border);
+  background: #000;
+  aspect-ratio: 16/9;
+}
+
+.lobbyPreview {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.lobbyPreview video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scaleX(-1); /* Mirror effect */
+}
+
+.loader {
+  height: 100%;
   display: flex;
   align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+}
+
+/* -- Mini Toggles in Preview -- */
+.previewOverlay {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
   gap: 12px;
-  border: 1px solid rgba(255,255,255,0.05);
+  background: rgba(0, 0, 0, 0.6);
+  padding: 6px 12px;
+  border-radius: 100px;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.1);
 }
 
-.codeLabel { color: #71717a; font-size: 0.85rem; }
-.codeValue { font-weight: 600; color: #bef264; font-family: monospace; font-size: 1rem; letter-spacing: 0.5px; }
-
-.copyBtn {
-  background: transparent; border: none;
-  color: #bef264;
+.miniToggle {
+  background: transparent;
+  border: none;
+  color: #fff;
   cursor: pointer;
-  display: flex; align-items: center;
   padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   opacity: 0.8;
   transition: opacity 0.2s;
 }
-.copyBtn:hover { opacity: 1; }
-.copyBtn svg { width: 18px; height: 18px; }
 
-.logoSmall {
-  font-weight: 700; font-size: 1.25rem;
-  color: white;
+.miniToggle:hover { opacity: 1; }
+.miniToggle svg { width: 18px; height: 18px; }
+.miniToggle.off { color: var(--danger); }
+
+/* =========================================
+   3. INPUTS & STATES (LOCKED / ERROR)
+   ========================================= */
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
 }
 
-/* Video Grid */
-.videoGrid {
-  flex: 1;
-  padding: 10px 20px 100px 20px;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  grid-auto-rows: minmax(220px, 1fr);
-  gap: 16px;
-  overflow-y: auto;
-}
-
-.videoGrid::-webkit-scrollbar { width: 6px; }
-.videoGrid::-webkit-scrollbar-track { background: transparent; }
-.videoGrid::-webkit-scrollbar-thumb { background-color: rgba(255,255,255,0.08); border-radius: 20px; }
-
-.videoTile {
-  background: #000;
-  border-radius: 16px;
-  overflow: hidden;
+.inputWrapper {
   position: relative;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
-  border: 1px solid rgba(255,255,255,0.08);
-}
-
-.videoTile video {
-  width: 100%; height: 100%;
-  object-fit: cover;
-}
-
-.userInfoTag {
-  position: absolute;
-  bottom: 12px; left: 12px;
-  background: rgba(0, 0, 0, 0.8);
-  backdrop-filter: blur(4px);
-  color: white;
-  padding: 4px 10px;
-  border-radius: 6px;
-  font-weight: 600;
-  font-size: 0.8rem;
-  border: 1px solid rgba(255,255,255,0.1);
-}
-
-.emptyState {
-  grid-column: 1 / -1;
-  display: flex; flex-direction: column;
-  justify-content: center; align-items: center;
-  color: #52525b;
-}
-
-.emptyIcon { font-size: 4rem; margin-bottom: 1rem; opacity: 0.3; }
-
-/* Self View (PiP) */
-.selfPip {
-  position: fixed;
-  bottom: 100px; right: 20px;
-  width: 220px; aspect-ratio: 16/9;
-  border-radius: 12px;
-  overflow: hidden;
-  border: 1px solid rgba(255,255,255,0.1);
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.8);
-  z-index: 50;
-  background: #000;
-  transition: transform 0.2s;
-}
-
-.selfPip:hover { transform: scale(1.02); border-color: #bef264; }
-
-.selfPip video {
-  width: 100%; height: 100%;
-  object-fit: cover; transform: scaleX(-1);
-}
-
-.pipPlaceholder {
-  position: absolute; top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: #18181b; color: white;
-  display: flex; align-items: center; justify-content: center;
-  font-weight: 500;
-  font-size: 0.9rem;
-}
-
-/* Bottom Dock */
-.bottomDock {
-  position: fixed;
-  bottom: 30px;
   width: 100%;
-  display: flex; justify-content: center;
-  z-index: 100;
+}
+
+.lobbyCard input {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--glass-border);
+  color: #fff;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.lobbyCard input:focus {
+  border-color: var(--lime-neon);
+  box-shadow: 0 0 0 2px var(--lime-glow);
+  background: rgba(0, 0, 0, 0.5);
+}
+
+/* Locked State (When Link is Used) */
+.inputLocked {
+  background: rgba(255, 255, 255, 0.03) !important;
+  color: var(--text-muted) !important;
+  cursor: default;
+  padding-right: 44px !important;
+  border-color: transparent !important;
+}
+
+.lockedInputContainer {
+  position: relative;
+}
+
+.lockIcon {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--lime-neon);
+  display: flex;
+  align-items: center;
   pointer-events: none;
 }
 
-.dockContent {
-  pointer-events: auto;
-  background: rgba(15, 15, 18, 0.95); /* Nearly opaque dark */
-  backdrop-filter: blur(16px);
-  padding: 12px 24px;
-  border-radius: 100px;
-  display: flex;
-  gap: 16px;
-  box-shadow: 0 20px 40px -5px rgba(0, 0, 0, 0.6);
-  border: 1px solid rgba(255,255,255,0.08);
-  align-items: center;
+.lockIcon svg { width: 16px; height: 16px; }
+
+/* Status Messages */
+.verifyingMsg {
+  width: 100%;
+  padding: 12px;
+  background: rgba(212, 255, 0, 0.05);
+  color: var(--lime-neon);
+  font-size: 0.9rem;
+  text-align: center;
+  border-radius: 12px;
+  border: 1px dashed rgba(212, 255, 0, 0.3);
+  animation: pulse 1.5s infinite ease-in-out;
 }
 
-.dockBtn {
-  width: 52px; height: 52px;
+.errorMsg {
+  width: 100%;
+  padding: 12px;
+  background: rgba(255, 59, 48, 0.1);
+  color: var(--danger);
+  font-size: 0.9rem;
+  text-align: center;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 59, 48, 0.2);
+}
+
+/* Join Button */
+.joinBtn {
+  width: 100%;
+  background: var(--lime-neon);
+  color: #000;
+  font-weight: 700;
+  border: none;
+  padding: 14px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  box-shadow: 0 4px 15px var(--lime-glow);
+}
+
+.joinBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px var(--lime-glow);
+}
+
+.joinBtn:active { transform: scale(0.98); }
+
+.joinBtn:disabled {
+  background: #2a2a2a;
+  color: #555;
+  box-shadow: none;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* =========================================
+   4. MEETING ROOM (GRID & TILES)
+   ========================================= */
+.meetingRoom {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.gridShell {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  align-items: stretch;
+}
+
+.videoGrid {
+  width: 100%;
+  max-width: 1080px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 380px));
+  gap: 1rem;
+  padding: 1rem;
+  overflow-y: auto;
+  overflow-x: hidden;
+  align-content: start;
+  justify-content: center;
+  justify-items: stretch;
+  align-items: start;
+  min-height: 0;
+  padding-bottom: 220px;
+  scroll-padding-bottom: 220px;
+  scrollbar-gutter: stable;
+}
+
+.compactGrid {
+  grid-template-columns: repeat(auto-fit, minmax(200px, 300px));
+  gap: 0.75rem;
+  padding: 0.75rem 0.75rem 200px;
+  scroll-padding-bottom: 200px;
+}
+
+.waitingOverlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--text-muted);
+  z-index: 2;
+  background: rgba(0, 0, 0, 0.65);
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  pointer-events: auto;
+}
+
+.videoTile {
+  position: relative;
+  width: 100%;
+  background: #111;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+  animation: scaleIn 0.3s ease-out;
+  padding-top: 56.25%;
+}
+
+.videoTile video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.nameTag, .localNameTag {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  pointer-events: none;
+}
+
+.localNameTag {
+  background: var(--pink-neon);
+  box-shadow: 0 0 10px var(--pink-glow);
+}
+
+.activeSpeaker {
+  box-shadow: 0 0 0 2px rgba(212, 255, 0, 0.6), 0 0 22px rgba(212, 255, 0, 0.15);
+  border-color: rgba(212, 255, 0, 0.65);
+}
+
+.localVideoFloating {
+  border: 1px solid rgba(255, 0, 153, 0.5);
+  box-shadow: 0 8px 30px rgba(255, 0, 153, 0.15);
+}
+
+.localVideoFloating video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.localVideoFloating video {
+  transform: scaleX(-1);
+}
+
+.codePill {
+  margin-top: 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 8px 16px;
+  border-radius: 100px;
+  border: 1px dashed var(--lime-neon);
+  color: var(--lime-neon);
+  font-family: monospace;
+  font-size: 1.1rem;
+  letter-spacing: 1px;
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.codePill:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 0 1px rgba(212, 255, 0, 0.35), 0 0 18px rgba(212, 255, 0, 0.12);
+}
+
+.codePillCopied {
+  background: rgba(212, 255, 0, 0.12);
+}
+
+.codePillIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.codePillIcon svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* =========================================
+   5. CONTROL BAR (COMPACT)
+   ========================================= */
+.controlBar {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(15, 15, 15, 0.85);
+  backdrop-filter: blur(16px);
+  padding: 10px 20px;
+  border-radius: 100px;
+  border: 1px solid var(--glass-border);
+  z-index: 100;
+  box-shadow: 0 20px 40px -10px rgba(0,0,0,0.6);
+}
+
+.iconBtn {
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   border: none;
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
   transition: all 0.2s ease;
-  font-size: 0; 
 }
 
-.dockBtn:hover {
-  transform: translateY(-4px);
+.iconBtn svg { width: 20px; height: 20px; }
+
+/* Off State (Red) */
+.iconBtn.off {
+  background: rgba(255, 59, 48, 0.15);
+  color: var(--danger);
 }
 
-.dockBtn svg { width: 24px; height: 24px; stroke-width: 2; }
-
-/* Control States (Bottom Dock) */
-.isOn {
-  background: #27272a; /* Neutral Dark Zinc */
-  color: white;
-  border: 1px solid rgba(255,255,255,0.1);
-}
-.isOn:hover {
-  background: #3f3f46; /* Lighter on hover */
+/* Active State (Lime) */
+.iconBtn.active {
+  background: var(--lime-glow);
+  color: var(--lime-neon);
+  border: 1px solid var(--lime-neon);
 }
 
-/* RED BUTTON for OFF state */
-.isOff {
-  background: #f87171; 
-  color: #27272a;
-  box-shadow: 0 0 10px rgba(248, 113, 113, 0.3);
+/* End Call (Pink) */
+.endCallBtn {
+  background: var(--pink-neon);
+  color: #fff;
+  margin-left: 8px;
 }
 
-.isSharing {
-  background: #bef264; /* Lime */
-  color: #1a2e05;
-  box-shadow: 0 0 10px rgba(190, 242, 100, 0.3);
+.endCallBtn:hover {
+  background: #d1007e;
+  box-shadow: 0 0 15px var(--pink-glow);
 }
 
-.hangupBtn {
-  background: #ef4444; /* Red */
-  color: white;
-  margin-left: 12px;
+.sep {
+  width: 1px;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 0 4px;
 }
 
-.hangupBtn:hover {
-  background: #b91c1c;
+/* =========================================
+   6. MOBILE & ANIMATIONS
+   ========================================= */
+@media (max-width: 900px) {
+  .videoGrid {
+    max-width: 100%;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 320px));
+    padding-bottom: 200px;
+    scroll-padding-bottom: 200px;
+  }
 }
 
+@media (max-width: 640px) {
+  .videoGrid {
+    grid-template-columns: 1fr;
+    padding-bottom: 190px;
+    scroll-padding-bottom: 190px;
+  }
 
+  .compactGrid {
+    grid-template-columns: 1fr;
+    gap: 0.6rem;
+    padding: 0.75rem 0.75rem 170px;
+    scroll-padding-bottom: 170px;
+  }
 
+  .controlBar {
+    width: 92%;
+    justify-content: space-around;
+    padding: 10px;
+    gap: 8px;
+    bottom: 16px;
+  }
 
+  .iconBtn { width: 40px; height: 40px; }
 
-/* ... existing styles ... */
-
-.captionsOverlay {
-    position: absolute;
-    bottom: 100px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 80%;
-    max-width: 600px;
-    background: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(10px);
-    padding: 15px;
-    border-radius: 12px;
-    color: white;
-    z-index: 100;
-    pointer-events: none; /* Let clicks pass through */
+  .lobbyCard {
+    max-width: 100%;
+    padding: 1.5rem;
+  }
 }
 
-.captionsTitle {
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: #ff4757;
-    margin-bottom: 8px;
-    font-weight: bold;
+@keyframes floatUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.captionLine {
-    font-size: 1rem;
-    margin-bottom: 4px;
-    line-height: 1.4;
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
 }
 
-/* Style for the button when active */
-.isRecording {
-    background-color: #ff4757 !important; /* Red */
-    border-color: #ff4757 !important;
-}
-
-/* Mobile Responsiveness */
-@media (max-width: 768px) {
-  .lobbyCard { width: 90%; padding: 20px; }
-  .videoGrid { grid-template-columns: 1fr; }
-  .selfPip { width: 110px; bottom: 90px; right: 10px; }
-  .dockContent { padding: 10px 16px; gap: 12px; border-radius: 20px; width: 90%; justify-content: space-around; }
-  .dockBtn { width: 44px; height: 44px; }
-  .topBar { padding: 12px 16px; }
-  .codeLabel { display: none; }
+@keyframes pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
 }

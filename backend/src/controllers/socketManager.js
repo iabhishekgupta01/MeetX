@@ -42,6 +42,8 @@ module.exports = (server) => {
                 }
                 connections[meetingId].push(socket.id);
 
+                socket.join(meetingId);
+
                 timeOnline[socket.id] = new Date();
 
                 // Update meeting in database
@@ -64,8 +66,13 @@ module.exports = (server) => {
                     io.to(meetingId).emit("meeting-updated", meeting);
                 }
 
-                connections[meetingId].forEach((userId) => {
-                    io.to(userId).emit("user-joined", socket.id, connections[meetingId]);
+                const clientsPayload = connections[meetingId].map((socketId) => ({
+                    socketId,
+                    username: usernames[socketId] || "User"
+                }));
+
+                connections[meetingId].forEach((userSocketId) => {
+                    io.to(userSocketId).emit("user-joined", socket.id, clientsPayload);
                 });
 
                 if (messages[meetingId] != undefined) {
@@ -79,7 +86,8 @@ module.exports = (server) => {
         });
 
         socket.on("signal", (toId, msg) => {
-            io.to(toId).emit("signal", socket.id, msg);
+            const senderName = usernames[socket.id] || "User";
+            io.to(toId).emit("signal", socket.id, msg, senderName);
         });
 
         socket.on("chat-message", (data, sender) => {

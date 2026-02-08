@@ -32,6 +32,8 @@ function Dashboard() {
   const [selectedMeeting, setSelectedMeeting] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedDetailMeeting, setSelectedDetailMeeting] = useState(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [detailError, setDetailError] = useState("");
   const [showJoinByCodeModal, setShowJoinByCodeModal] = useState(false);
   const [meetingCode, setMeetingCode] = useState("");
   const [activeTab, setActiveTab] = useState("scheduled"); // scheduled or completed
@@ -169,9 +171,29 @@ function Dashboard() {
     alert("Meeting code copied!");
   };
 
-  const openDetailModal = (meeting) => {
-    setSelectedDetailMeeting(meeting);
+  const openDetailModal = async (meeting) => {
     setShowDetailModal(true);
+    setSelectedDetailMeeting(meeting);
+    setDetailError("");
+    setDetailLoading(true);
+
+    try {
+      const response = await axios.get(`${serverUrl}/api/v1/meeting/${meeting.meetingId}`);
+      if (response.data?.meeting) {
+        setSelectedDetailMeeting(response.data.meeting);
+      }
+    } catch (error) {
+      console.error("Error fetching meeting details:", error);
+      if (error.response?.status === 410) {
+        setDetailError("This meeting has expired and is no longer available.");
+      } else if (error.response?.status === 404) {
+        setDetailError("Meeting not found.");
+      } else {
+        setDetailError("Failed to load meeting details.");
+      }
+    } finally {
+      setDetailLoading(false);
+    }
   };
 
   const isExpired = (expiresAt) => {
@@ -421,6 +443,8 @@ function Dashboard() {
             meeting={selectedDetailMeeting}
             onClose={() => setShowDetailModal(false)}
             getUniqueParticipants={getUniqueParticipants}
+            isLoading={detailLoading}
+            error={detailError}
           />
         )}
       </main>

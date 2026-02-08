@@ -1,26 +1,42 @@
 import React from "react";
 import styles from "./MeetingDetailModal.module.css";
 
-function MeetingDetailModal({ meeting, onClose, getUniqueParticipants }) {
-  if (!meeting) return null;
+function MeetingDetailModal({ meeting, onClose, getUniqueParticipants, isLoading = false, error = "" }) {
+  if (!meeting && !isLoading && !error) return null;
 
-  const participants = getUniqueParticipants(meeting.participants);
-  // Assuming meeting.hostName exists, otherwise default to "Admin"
-  const hostName = meeting.hostName || "Admin"; 
+  const participantsSource = meeting?.participants || [];
+  const participants = getUniqueParticipants ? getUniqueParticipants(participantsSource) : participantsSource;
+  const hostName = meeting?.hostName || "Admin";
 
   const formatDuration = (seconds) => {
-    if (!seconds) return "--";
+    if (!seconds || Number.isNaN(seconds)) return "--";
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
     return `${m}m ${s}s`;
   };
 
-  const formattedDate = new Date(meeting.createdAt).toLocaleDateString(undefined, {
-    weekday: 'short', month: 'short', day: 'numeric'
-  });
-  
-  const formattedTime = meeting.startedAt 
-    ? new Date(meeting.startedAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+  const startedAt = meeting?.startedAt || meeting?.createdAt;
+  const endedAt = meeting?.endedAt;
+  const expiresAt = meeting?.expiresAt;
+  const isExpired = expiresAt ? new Date() > new Date(expiresAt) : false;
+  const isEnded = meeting ? !meeting.isActive || isExpired : false;
+
+  const durationSeconds = meeting?.duration
+    ? meeting.duration
+    : startedAt && endedAt
+      ? Math.floor((new Date(endedAt) - new Date(startedAt)) / 1000)
+      : 0;
+
+  const formattedDate = startedAt
+    ? new Date(startedAt).toLocaleDateString(undefined, {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+      })
+    : "--";
+
+  const formattedTime = startedAt
+    ? new Date(startedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
     : "--:--";
 
   return (
@@ -32,13 +48,13 @@ function MeetingDetailModal({ meeting, onClose, getUniqueParticipants }) {
           <button className={styles.closeBtn} onClick={onClose}>&times;</button>
           
           <div className={styles.headerTop}>
-             <span className={meeting.isActive ? styles.badgeActive : styles.badgeEnded}>
-                {meeting.isActive ? "Live" : "Ended"}
-             </span>
-             <span className={styles.dateBadge}>{formattedDate}</span>
+            <span className={isEnded ? styles.badgeEnded : styles.badgeActive}>
+              {isEnded ? "Ended" : "Live"}
+            </span>
+            <span className={styles.dateBadge}>{formattedDate}</span>
           </div>
 
-          <h2 className={styles.title}>{meeting.title}</h2>
+          <h2 className={styles.title}>{meeting?.title || "Untitled Meeting"}</h2>
 
           {/* Compact Metadata Line */}
           <div className={styles.metaLine}>
@@ -50,7 +66,7 @@ function MeetingDetailModal({ meeting, onClose, getUniqueParticipants }) {
             <div className={styles.timeInfo}>
                <span>⏰ {formattedTime}</span>
                <span className={styles.dot}>•</span>
-               <span>⏳ {formatDuration(meeting.duration)}</span>
+               <span>⏳ {formatDuration(durationSeconds)}</span>
             </div>
           </div>
         </div>
@@ -59,7 +75,7 @@ function MeetingDetailModal({ meeting, onClose, getUniqueParticipants }) {
         <div className={styles.body}>
           
           {/* Description - Only shows if text exists */}
-          {meeting.description && (
+          {meeting?.description && (
             <div className={styles.descriptionBox}>
               <p>{meeting.description}</p>
             </div>
@@ -73,26 +89,31 @@ function MeetingDetailModal({ meeting, onClose, getUniqueParticipants }) {
             </div>
             
             <div className={styles.participantsList}>
-              {participants.length > 0 ? (
+              {isLoading && <div className={styles.emptyState}>Loading details...</div>}
+              {!isLoading && error && <div className={styles.emptyState}>{error}</div>}
+              {!isLoading && !error && participants.length > 0 && (
                 participants.map((p, idx) => (
                   <div key={idx} className={styles.participantRow}>
                     <div className={styles.pLeft}>
                       <div className={styles.pAvatar}>
-                        {p.username.charAt(0).toUpperCase()}
+                        {(p.username || "Guest").charAt(0).toUpperCase()}
                       </div>
                       <div className={styles.pDetails}>
-                        <span className={styles.pName}>{p.username}</span>
-                        <span className={styles.pJoinTime}>Joined {new Date(p.joinedAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                        <span className={styles.pName}>{p.username || "Guest"}</span>
+                        <span className={styles.pJoinTime}>
+                          Joined {p.joinedAt ? new Date(p.joinedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "--:--"}
+                        </span>
                       </div>
                     </div>
-                    {p.duration && (
-                       <div className={styles.pDurationBadge}>
-                         {formatDuration(p.duration)}
-                       </div>
-                    )}
+                    {p.duration ? (
+                      <div className={styles.pDurationBadge}>
+                        {formatDuration(p.duration)}
+                      </div>
+                    ) : null}
                   </div>
                 ))
-              ) : (
+              )}
+              {!isLoading && !error && participants.length === 0 && (
                 <div className={styles.emptyState}>No one joined yet.</div>
               )}
             </div>
