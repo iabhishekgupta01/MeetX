@@ -2,8 +2,8 @@
 .sidebar {
   width: 280px;
   height: 100vh;
-  background: #0f172a; /* Dark Slate Theme */
-  border-right: 1px solid #334155;
+  background: var(--bg-slate-900); /* Dark Slate Theme */
+  border-right: 1px solid var(--border-slate);
   display: flex;
   flex-direction: column;
   padding: 1.5rem;
@@ -25,8 +25,8 @@
 .logoIcon {
   width: 36px;
   height: 36px;
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
-  color: white;
+  background: var(--gradient-blue);
+  color: var(--text-white);
   border-radius: 10px;
   display: flex;
   align-items: center;
@@ -39,11 +39,11 @@
 .brandText {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #f8fafc;
+  color: var(--text-main);
   letter-spacing: -0.5px;
 }
 
-.brandAccent { color: #3b82f6; }
+.brandAccent { color: var(--accent-blue); }
 
 /* 2. User Profile */
 .userSection {
@@ -51,10 +51,10 @@
 }
 
 .userCard {
-  background: #1e293b;
-  border: 1px solid #334155;
+  background: var(--bg-slate-800);
+  border: 1px solid var(--border-slate);
   padding: 0.8rem;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   gap: 0.8rem;
@@ -62,20 +62,20 @@
 }
 
 .userCard:hover {
-  border-color: #475569;
+  border-color: var(--border-slate-soft);
 }
 
 .avatar {
   width: 40px;
   height: 40px;
-  background: #0f172a;
-  color: #94a3b8;
+  background: var(--bg-slate-900);
+  color: var(--text-muted);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 600;
-  border: 1px solid #334155;
+  border: 1px solid var(--border-slate);
 }
 
 .userInfo {
@@ -86,7 +86,7 @@
 
 .userLabel {
   font-size: 0.7rem;
-  color: #64748b;
+  color: var(--text-muted-2);
   text-transform: uppercase;
   font-weight: 700;
   letter-spacing: 0.5px;
@@ -94,7 +94,7 @@
 
 .userName {
   font-size: 0.95rem;
-  color: #e2e8f0;
+  color: var(--text-strong);
   font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
@@ -111,7 +111,7 @@
 
 .sectionTitle {
   font-size: 0.75rem;
-  color: #475569;
+  color: var(--border-slate-soft);
   text-transform: uppercase;
   font-weight: 700;
   margin-bottom: 0.5rem;
@@ -126,7 +126,7 @@
   border-radius: 10px;
   border: none;
   background: transparent;
-  color: #94a3b8;
+  color: var(--text-muted);
   font-size: 0.95rem;
   font-weight: 500;
   cursor: pointer;
@@ -136,39 +136,39 @@
 
 .navItem:hover {
   background: rgba(255, 255, 255, 0.05);
-  color: #f1f5f9;
+  color: var(--text-bright);
   transform: translateX(4px);
 }
 
 .navItem svg {
-  color: #64748b;
+  color: var(--text-muted-2);
   transition: color 0.2s;
 }
 
 .navItem:hover svg {
-  color: #3b82f6;
+  color: var(--accent-blue);
 }
 
 /* Primary "New Meeting" Button */
 .primaryBtn {
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
-  color: white !important;
+  background: var(--gradient-blue);
+  color: var(--text-white) !important;
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
   margin-bottom: 0.5rem;
 }
 
 .primaryBtn:hover {
-  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  background: var(--gradient-blue-hover);
   transform: translateY(-2px);
-  color: white !important;
+  color: var(--text-white) !important;
 }
 
-.primaryBtn svg { color: white !important; }
+.primaryBtn svg { color: var(--text-white) !important; }
 
 /* 4. Footer / Logout */
 .footerSection {
   margin-top: auto;
-  border-top: 1px solid #334155;
+  border-top: 1px solid var(--border-slate);
   padding-top: 1rem;
 }
 
@@ -181,7 +181,7 @@
   background: transparent;
   border: 1px solid transparent;
   border-radius: 10px;
-  color: #ef4444;
+  color: var(--accent-red);
   cursor: pointer;
   font-weight: 600;
   transition: all 0.2s;

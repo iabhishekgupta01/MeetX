@@ -1,24 +1,6 @@
 /* =========================================
-   1. THEME VARIABLES & BASE SETUP
-   ========================================= */
-:root {
-  /* -- Palette -- */
-  --lime-neon: #d4ff00;       /* Primary Action / Brand */
-  --lime-glow: rgba(212, 255, 0, 0.15);
-  --pink-neon: #ff0099;       /* Secondary / Hangup */
-  --pink-glow: rgba(255, 0, 153, 0.2);
-  
-  /* -- Backgrounds -- */
-  --bg-void: #050505;         /* Deepest Black */
-  --bg-glass: rgba(20, 20, 20, 0.6); /* Frosted Glass */
-  --glass-border: rgba(255, 255, 255, 0.08);
-  
-  /* -- Text & Utility -- */
-  --text-main: #ffffff;
-  --text-muted: #888888;
-  --danger: #ff3b30;
-  --success: #34c759;
-}
+  1. BASE SETUP
+  ========================================= */
 
 .wrapper {
   height: 100vh;
@@ -68,7 +50,7 @@
   font-weight: 800;
   text-align: center;
   margin: 0;
-  color: #fff;
+  color: var(--text-white);
   letter-spacing: -1.5px;
 }
 
@@ -86,7 +68,7 @@
   border-radius: 16px;
   overflow: hidden;
   border: 1px solid var(--glass-border);
-  background: #000;
+  background: var(--brand-x);
   aspect-ratio: 16/9;
 }
 
@@ -121,7 +103,7 @@
   transform: translateX(-50%);
   display: flex;
   gap: 12px;
-  background: rgba(0, 0, 0, 0.6);
+  background: var(--overlay-black-60);
   padding: 6px 12px;
   border-radius: 100px;
   backdrop-filter: blur(8px);
@@ -131,7 +113,7 @@
 .miniToggle {
   background: transparent;
   border: none;
-  color: #fff;
+  color: var(--text-white);
   cursor: pointer;
   padding: 4px;
   display: flex;
@@ -163,7 +145,7 @@
   width: 100%;
   background: rgba(0, 0, 0, 0.3);
   border: 1px solid var(--glass-border);
-  color: #fff;
+  color: var(--text-white);
   padding: 12px 16px;
   border-radius: 12px;
   font-size: 0.95rem;
@@ -174,12 +156,12 @@
 .lobbyCard input:focus {
   border-color: var(--lime-neon);
   box-shadow: 0 0 0 2px var(--lime-glow);
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--overlay-black-50);
 }
 
 /* Locked State (When Link is Used) */
 .inputLocked {
-  background: rgba(255, 255, 255, 0.03) !important;
+  background: var(--surface-white-03) !important;
   color: var(--text-muted) !important;
   cursor: default;
   padding-right: 44px !important;
@@ -224,14 +206,14 @@
   font-size: 0.9rem;
   text-align: center;
   border-radius: 12px;
-  border: 1px solid rgba(255, 59, 48, 0.2);
+  border: 1px solid var(--meeting-danger-surface-20);
 }
 
 /* Join Button */
 .joinBtn {
   width: 100%;
   background: var(--lime-neon);
-  color: #000;
+  color: var(--brand-x);
   font-weight: 700;
   border: none;
   padding: 14px;
@@ -250,8 +232,8 @@
 .joinBtn:active { transform: scale(0.98); }
 
 .joinBtn:disabled {
-  background: #2a2a2a;
-  color: #555;
+  background: var(--disabled-bg);
+  color: var(--disabled-text);
   box-shadow: none;
   cursor: not-allowed;
   transform: none;
@@ -314,20 +296,20 @@
   gap: 0.75rem;
   color: var(--text-muted);
   z-index: 2;
-  background: rgba(0, 0, 0, 0.65);
+  background: var(--overlay-black-65);
   padding: 8px 14px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid var(--border-medium);
   pointer-events: auto;
 }
 
 .videoTile {
   position: relative;
   width: 100%;
-  background: #111;
+  background: var(--brand-x-hover);
   border-radius: 16px;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid var(--border-medium);
   box-shadow: 0 8px 30px rgba(0,0,0,0.5);
   animation: scaleIn 0.3s ease-out;
   padding-top: 56.25%;
@@ -345,9 +327,9 @@
   position: absolute;
   bottom: 10px;
   left: 10px;
-  background: rgba(0, 0, 0, 0.6);
+  background: var(--overlay-black-60);
   backdrop-filter: blur(8px);
-  color: #fff;
+  color: var(--text-white);
   padding: 4px 10px;
   border-radius: 8px;
   font-size: 0.8rem;
@@ -391,7 +373,7 @@
   background: rgba(0, 0, 0, 0.55);
   padding: 6px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid var(--border-medium);
   backdrop-filter: blur(8px);
 }
 
@@ -401,7 +383,7 @@
   border-radius: 50%;
   border: none;
   background: rgba(255, 255, 255, 0.08);
-  color: #fff;
+  color: var(--text-white);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -416,16 +398,16 @@
 
 .adminBtn:hover {
   transform: translateY(-1px);
-  background: rgba(255, 255, 255, 0.16);
+  background: var(--border-bright);
 }
 
 .adminBtnDanger {
-  background: rgba(255, 59, 48, 0.2);
+  background: var(--meeting-danger-surface-20);
   color: var(--danger);
 }
 
 .adminBtnDanger:hover {
-  background: rgba(255, 59, 48, 0.35);
+  background: var(--meeting-danger-border-35);
 }
 
 .mutedBadge {
@@ -440,7 +422,7 @@
   border-radius: 50%;
   background: rgba(255, 59, 48, 0.25);
   color: var(--danger);
-  border: 1px solid rgba(255, 59, 48, 0.35);
+  border: 1px solid var(--meeting-danger-border-35);
   backdrop-filter: blur(6px);
 }
 
@@ -452,7 +434,7 @@
 .modalBackdrop {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.6);
+  background: var(--overlay-black-60);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -461,12 +443,12 @@
 
 .removeModalCard {
   width: min(360px, 92vw);
-  background: linear-gradient(160deg, rgba(22, 22, 22, 0.98), rgba(8, 8, 8, 0.95));
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: linear-gradient(160deg, var(--meeting-modal-surface-start), var(--meeting-modal-surface-end));
+  border: 1px solid var(--border-strong);
   border-radius: 18px;
   padding: 18px;
-  color: #fff;
-  box-shadow: 0 22px 55px rgba(0, 0, 0, 0.6);
+  color: var(--text-white);
+  box-shadow: 0 22px 55px var(--overlay-black-60);
   backdrop-filter: blur(12px);
   animation: scaleIn 0.25s ease-out;
 }
@@ -485,8 +467,8 @@
   align-items: center;
   justify-content: center;
   border-radius: 12px;
-  background: rgba(255, 0, 153, 0.12);
-  border: 1px solid rgba(255, 0, 153, 0.35);
+  background: var(--meeting-pink-surface-12);
+  border: 1px solid var(--meeting-pink-border-35);
   color: var(--pink-neon);
   box-shadow: 0 0 14px var(--pink-glow);
 }
@@ -515,9 +497,9 @@
 }
 
 .modalBtn {
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  background: rgba(255, 255, 255, 0.06);
-  color: #fff;
+  border: 1px solid var(--border-heavy);
+  background: var(--surface-white-06);
+  color: var(--text-white);
   padding: 8px 14px;
   border-radius: 10px;
   cursor: pointer;
@@ -525,12 +507,12 @@
 }
 
 .modalBtn:hover {
-  background: rgba(255, 255, 255, 0.12);
+  background: var(--border-medium);
   transform: translateY(-1px);
 }
 
 .modalBtnDanger {
-  background: rgba(255, 59, 48, 0.18);
+  background: var(--meeting-danger-surface-18);
   color: var(--danger);
   border-color: rgba(255, 59, 48, 0.4);
 }
@@ -541,12 +523,12 @@
 
 .endModalCard {
   width: min(360px, 92vw);
-  background: linear-gradient(160deg, rgba(22, 22, 22, 0.98), rgba(8, 8, 8, 0.95));
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: linear-gradient(160deg, var(--meeting-modal-surface-start), var(--meeting-modal-surface-end));
+  border: 1px solid var(--border-strong);
   border-radius: 18px;
   padding: 20px 18px;
-  color: #fff;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+  color: var(--text-white);
+  box-shadow: 0 24px 60px var(--overlay-black-60);
   backdrop-filter: blur(12px);
   text-align: center;
   animation: scaleIn 0.25s ease-out;
@@ -560,8 +542,8 @@
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: rgba(255, 0, 153, 0.12);
-  border: 1px solid rgba(255, 0, 153, 0.35);
+  background: var(--meeting-pink-surface-12);
+  border: 1px solid var(--meeting-pink-border-35);
   color: var(--pink-neon);
   box-shadow: 0 0 18px var(--pink-glow);
 }
@@ -590,7 +572,7 @@
   border-radius: 10px;
   padding: 9px 12px;
   background: var(--lime-neon);
-  color: #000;
+  color: var(--brand-x);
   font-weight: 700;
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -605,11 +587,11 @@
 .endConfirmCard {
   width: min(360px, 92vw);
   background: linear-gradient(160deg, rgba(20, 20, 20, 0.98), rgba(10, 10, 10, 0.96));
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border: 1px solid var(--border-strong);
   border-radius: 18px;
   padding: 18px;
-  color: #fff;
-  box-shadow: 0 22px 55px rgba(0, 0, 0, 0.6);
+  color: var(--text-white);
+  box-shadow: 0 22px 55px var(--overlay-black-60);
   backdrop-filter: blur(12px);
   animation: scaleIn 0.25s ease-out;
 }
@@ -628,8 +610,8 @@
   align-items: center;
   justify-content: center;
   border-radius: 14px;
-  background: rgba(255, 0, 153, 0.12);
-  border: 1px solid rgba(255, 0, 153, 0.35);
+  background: var(--meeting-pink-surface-12);
+  border: 1px solid var(--meeting-pink-border-35);
   color: var(--pink-neon);
   box-shadow: 0 0 14px var(--pink-glow);
   flex: 0 0 auto;
@@ -667,10 +649,10 @@
   align-items: center;
   gap: 10px;
   background: rgba(15, 15, 15, 0.9);
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border: 1px solid var(--border-strong);
   border-radius: 999px;
   padding: 8px 12px 8px 10px;
-  color: #fff;
+  color: var(--text-white);
   box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
   backdrop-filter: blur(10px);
   z-index: 210;
@@ -684,9 +666,9 @@
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: rgba(255, 59, 48, 0.18);
+  background: var(--meeting-danger-surface-18);
   color: var(--danger);
-  border: 1px solid rgba(255, 59, 48, 0.35);
+  border: 1px solid var(--meeting-danger-border-35);
 }
 
 .toastIcon svg {
@@ -696,7 +678,7 @@
 
 .toastText {
   font-size: 0.9rem;
-  color: #f1f1f1;
+  color: var(--text-white);
 }
 
 .toastClose {
@@ -709,12 +691,12 @@
 }
 
 .toastClose:hover {
-  color: #fff;
+  color: var(--text-white);
 }
 
 .codePill {
   margin-top: 1rem;
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--surface-white-03);
   padding: 8px 16px;
   border-radius: 100px;
   border: 1px dashed var(--lime-neon);
@@ -736,7 +718,7 @@
 }
 
 .codePillCopied {
-  background: rgba(212, 255, 0, 0.12);
+  background: var(--meeting-lime-surface-12);
 }
 
 .codePillIcon {
@@ -751,8 +733,87 @@
 }
 
 /* =========================================
-   5. CONTROL BAR (COMPACT)
+   5. LIVE CAPTIONS
    ========================================= */
+.captionsOverlay {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 92px;
+  width: min(820px, 92vw);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 110;
+  pointer-events: none;
+}
+
+.captionItem {
+  background: var(--overlay-black-65);
+  border: 1px solid var(--border-medium);
+  border-radius: 12px;
+  padding: 8px 12px;
+  color: var(--text-white);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+}
+
+.captionName {
+  color: var(--lime-neon);
+  font-weight: 700;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.captionText {
+  color: var(--text-white);
+  font-size: 0.95rem;
+  line-height: 1.35;
+  word-break: break-word;
+}
+
+.captionSettings {
+  position: absolute;
+  left: 24px;
+  bottom: 100px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: rgba(10, 10, 10, 0.75);
+  border: 1px solid var(--border-medium);
+  border-radius: 999px;
+  backdrop-filter: blur(10px);
+  z-index: 105;
+}
+
+.captionSettingsInline {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+.captionLabel {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.captionSelect {
+  background: var(--overlay-black-50);
+  color: var(--text-white);
+  border: 1px solid var(--border-bright);
+  border-radius: 10px;
+  padding: 6px 10px;
+  font-size: 0.85rem;
+}
+
+/* =========================================
+  6. CONTROL BAR (COMPACT)
+  ========================================= */
 .controlBar {
   position: absolute;
   bottom: 24px;
@@ -767,7 +828,7 @@
   border-radius: 100px;
   border: 1px solid var(--glass-border);
   z-index: 100;
-  box-shadow: 0 20px 40px -10px rgba(0,0,0,0.6);
+  box-shadow: 0 20px 40px -10px var(--overlay-black-60);
 }
 
 .iconBtn {
@@ -775,8 +836,8 @@
   height: 44px;
   border-radius: 50%;
   border: none;
-  background: rgba(255, 255, 255, 0.06);
-  color: #fff;
+  background: var(--surface-white-06);
+  color: var(--text-white);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -802,12 +863,12 @@
 /* End Call (Pink) */
 .endCallBtn {
   background: var(--pink-neon);
-  color: #fff;
+  color: var(--text-white);
   margin-left: 8px;
 }
 
 .endCallBtn:hover {
-  background: #d1007e;
+  background: var(--meeting-pink-hover);
   box-shadow: 0 0 15px var(--pink-glow);
 }
 
@@ -819,8 +880,8 @@
 }
 
 /* =========================================
-   6. MOBILE & ANIMATIONS
-   ========================================= */
+  7. MOBILE & ANIMATIONS
+  ========================================= */
 @media (max-width: 900px) {
   .videoGrid {
     max-width: 100%;
@@ -850,6 +911,16 @@
     padding: 10px;
     gap: 8px;
     bottom: 16px;
+  }
+
+  .captionsOverlay {
+    bottom: 84px;
+  }
+
+  .captionSettings {
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 160px;
   }
 
   .iconBtn { width: 40px; height: 40px; }

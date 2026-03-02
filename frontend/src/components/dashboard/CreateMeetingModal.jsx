@@ -52,7 +52,7 @@ function CreateMeetingModal({
             />
           </div>
 
-          {/* Duration Select */}
+          {/* Expiration Duration Select */}
           <div className={styles.inputGroup}>
              <div className={styles.iconWrapper}><ClockIcon /></div>
              <div className={styles.selectWrapper}>
@@ -61,14 +61,16 @@ function CreateMeetingModal({
                   onChange={(e) => onDurationChange(Number(e.target.value))}
                   className={styles.select}
                 >
-                  <option value={1}>1 Hour</option>
-                  <option value={3}>3 Hours</option>
-                  <option value={6}>6 Hours</option>
-                  <option value={12}>12 Hours</option>
-                  <option value={24}>24 Hours (Default)</option>
-                  <option value={48}>2 Days</option>
-                  <option value={72}>3 Days</option>
-                  <option value={168}>1 Week</option>
+                  <option value={15}>15 Minutes</option>
+                  <option value={30}>30 Minutes (Default)</option>
+                  <option value={45}>45 Minutes</option>
+                  <option value={60}>1 Hour</option>
+                  <option value={90}>1 Hour 30 Minutes</option>
+                  <option value={120}>2 Hours</option>
+                  <option value={180}>3 Hours</option>
+                  <option value={360}>6 Hours</option>
+                  <option value={720}>12 Hours</option>
+                  <option value={1440}>24 Hours</option>
                 </select>
                 <span className={styles.arrowIcon}>▼</span>
              </div>

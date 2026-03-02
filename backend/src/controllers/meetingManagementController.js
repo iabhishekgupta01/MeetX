@@ -1,5 +1,41 @@
 const { Meeting } = require("../models/meetingModel");
 
+const parseCaptionPayload = ({ captionEntries, captions, captionsJsonText }) => {
+  const candidates = [captionEntries, captions, captionsJsonText];
+
+  for (const candidate of candidates) {
+    if (Array.isArray(candidate)) return candidate;
+    if (typeof candidate === "string" && candidate.trim()) {
+      try {
+        const parsed = JSON.parse(candidate);
+        if (Array.isArray(parsed)) return parsed;
+      } catch (_error) {
+      }
+    }
+  }
+
+  return [];
+};
+
+const normalizeCaptionEntries = (entries, fallback = {}) =>
+  entries
+    .map((entry) => {
+      const timestamp = entry?.timestamp ? new Date(entry.timestamp) : new Date();
+      if (Number.isNaN(timestamp.getTime())) return null;
+
+      const text = (entry?.text || "").toString().trim();
+      if (!text) return null;
+
+      return {
+        timestamp,
+        socketId: (entry?.socketId || fallback.socketId || "unknown").toString(),
+        userId: (entry?.userId || fallback.userId || "").toString(),
+        username: (entry?.username || fallback.username || "User").toString(),
+        text
+      };
+    })
+    .filter(Boolean);
+
 /**
  * Generate a unique meeting code
  */
@@ -17,7 +53,7 @@ const generateMeetingCode = () => {
  */
 exports.createMeeting = async (req, res) => {
   try {
-    const { hostId, hostName, title, description, durationHours } = req.body;
+    const { hostId, hostName, title, description, durationMinutes, durationHours, scheduledFor } = req.body;
 
     if (!hostId || !hostName) {
       return res.status(400).json({ error: "hostId and hostName are required" });
@@ -34,9 +70,31 @@ exports.createMeeting = async (req, res) => {
       codeExists = !!existing;
     }
 
-    // Set expiration time (default 24 hours, or custom duration)
-    const expirationDuration = durationHours || 24; // hours
-    const expiresAt = new Date(Date.now() + expirationDuration * 60 * 60 * 1000);
+    const now = new Date();
+    let scheduledAt = null;
+    if (scheduledFor) {
+      const parsedSchedule = new Date(scheduledFor);
+      if (Number.isNaN(parsedSchedule.getTime())) {
+        return res.status(400).json({ error: "scheduledFor must be a valid datetime" });
+      }
+      if (parsedSchedule <= now) {
+        return res.status(400).json({ error: "scheduledFor must be in the future" });
+      }
+      scheduledAt = parsedSchedule;
+    }
+
+    // Set expiration from scheduled start (or now if immediate)
+    const expirationDurationMinutes = Number(durationMinutes);
+    const expirationDurationHours = Number(durationHours);
+    const resolvedDurationMinutes =
+      Number.isFinite(expirationDurationMinutes) && expirationDurationMinutes > 0
+        ? expirationDurationMinutes
+        : Number.isFinite(expirationDurationHours) && expirationDurationHours > 0
+          ? expirationDurationHours * 60
+          : 24 * 60;
+
+    const baseTime = scheduledAt || now;
+    const expiresAt = new Date(baseTime.getTime() + resolvedDurationMinutes * 60 * 1000);
 
     const meeting = new Meeting({
       meetingId,
@@ -45,6 +103,7 @@ exports.createMeeting = async (req, res) => {
       hostName,
       title: title || "Untitled Meeting",
       description: description || "",
+      scheduledFor: scheduledAt,
       expiresAt,
       participants: [
         {
@@ -111,6 +170,7 @@ exports.getMeetingByCode = async (req, res) => {
 exports.getMeetingDetails = async (req, res) => {
   try {
     const { meetingId } = req.params;
+    const includeInactive = req.query?.includeInactive === "true";
 
     const meeting = await Meeting.findOne({ meetingId });
 
@@ -118,8 +178,8 @@ exports.getMeetingDetails = async (req, res) => {
       return res.status(404).json({ error: "Meeting not found" });
     }
 
-    // Check if meeting has expired or ended
-    if (!meeting.isActive || new Date() > new Date(meeting.expiresAt)) {
+    // By default block expired/ended meetings; allow override for details/history views.
+    if (!includeInactive && (!meeting.isActive || new Date() > new Date(meeting.expiresAt))) {
       return res.status(410).json({ 
         error: "Meeting has expired", 
         expired: true,
@@ -230,7 +290,7 @@ exports.removeParticipant = async (req, res) => {
  */
 exports.endMeeting = async (req, res) => {
   try {
-    const { meetingId, transcript, summary } = req.body;
+    const { meetingId, transcript, summary, captionEntries, captions, captionsJsonText } = req.body;
 
     if (!meetingId) {
       return res.status(400).json({ error: "meetingId is required" });
@@ -259,6 +319,40 @@ exports.endMeeting = async (req, res) => {
       meeting.summary = summary;
     }
 
+    const incomingCaptions = parseCaptionPayload({ captionEntries, captions, captionsJsonText });
+    if (incomingCaptions.length > 0) {
+      const normalizedEntries = normalizeCaptionEntries(incomingCaptions);
+      if (normalizedEntries.length > 0) {
+        meeting.liveCaptions.push(...normalizedEntries);
+      }
+    }
+
+    if (meeting.liveCaptions && meeting.liveCaptions.length > 0) {
+      const orderedCaptions = [...meeting.liveCaptions]
+        .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+
+      meeting.captionsJsonText = JSON.stringify(
+        orderedCaptions.map((entry) => ({
+          timestamp: new Date(entry.timestamp).toISOString(),
+          socketId: entry.socketId,
+          userId: entry.userId || "",
+          username: entry.username,
+          text: entry.text
+        }))
+      );
+
+      const ordered = orderedCaptions
+        .map((entry) => {
+          const time = new Date(entry.timestamp).toISOString();
+          return `[${time}] ${entry.username}: ${entry.text}`;
+        })
+        .join("\n");
+
+      if (!meeting.transcript) {
+        meeting.transcript = ordered;
+      }
+    }
+
     await meeting.save();
 
     return res.json({
@@ -268,6 +362,59 @@ exports.endMeeting = async (req, res) => {
   } catch (error) {
     console.error("Error ending meeting:", error);
     return res.status(500).json({ error: "Failed to end meeting" });
+  }
+};
+
+exports.finalizeMeetingCaptions = async (req, res) => {
+  try {
+    const { meetingId, userId, username, captions, captionEntries, captionsJsonText } = req.body;
+
+    if (!meetingId) {
+      return res.status(400).json({ error: "meetingId is required" });
+    }
+
+    const incomingCaptions = parseCaptionPayload({ captionEntries, captions, captionsJsonText });
+    if (incomingCaptions.length === 0) {
+      return res.status(400).json({ error: "captions JSON is required" });
+    }
+
+    const meeting = await Meeting.findOne({ meetingId });
+    if (!meeting) {
+      return res.status(404).json({ error: "Meeting not found" });
+    }
+
+    const normalizedEntries = normalizeCaptionEntries(incomingCaptions, {
+      userId,
+      username
+    });
+
+    if (normalizedEntries.length === 0) {
+      return res.status(400).json({ error: "No valid caption entries" });
+    }
+
+    meeting.liveCaptions.push(...normalizedEntries);
+
+    const orderedCaptions = [...meeting.liveCaptions]
+      .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+    meeting.captionsJsonText = JSON.stringify(
+      orderedCaptions.map((entry) => ({
+        timestamp: new Date(entry.timestamp).toISOString(),
+        socketId: entry.socketId,
+        userId: entry.userId || "",
+        username: entry.username,
+        text: entry.text
+      }))
+    );
+
+    await meeting.save();
+
+    return res.json({
+      message: "Caption JSON saved",
+      saved: normalizedEntries.length
+    });
+  } catch (error) {
+    console.error("Error finalizing meeting captions:", error);
+    return res.status(500).json({ error: "Failed to finalize meeting captions" });
   }
 };
 

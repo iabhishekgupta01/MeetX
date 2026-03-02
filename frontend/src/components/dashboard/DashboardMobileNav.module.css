@@ -38,8 +38,8 @@
   .logoBox {
     width: 32px;
     height: 32px;
-    background: linear-gradient(135deg, #3b82f6, #2563eb);
-    color: white;
+    background: var(--gradient-blue);
+    color: var(--text-white);
     border-radius: 8px;
     display: flex;
     align-items: center;
@@ -52,11 +52,11 @@
   .logoText {
     font-size: 1.25rem;
     font-weight: 700;
-    color: #f8fafc;
+    color: var(--text-main);
     letter-spacing: -0.5px;
   }
 
-  .accent { color: #3b82f6; }
+  .accent { color: var(--accent-blue); }
 
   /* Animated Hamburger Icon */
   .menuToggle {
@@ -75,7 +75,7 @@
   .bar {
     width: 24px;
     height: 2px;
-    background-color: #cbd5e1;
+    background-color: var(--text-soft);
     border-radius: 2px;
     transition: all 0.3s ease;
     align-self: flex-end;
@@ -113,7 +113,7 @@
   .backdrop {
     position: absolute;
     top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.6);
+    background: var(--overlay-black-60);
     backdrop-filter: blur(2px);
     opacity: 0;
     transition: opacity 0.3s;
@@ -126,10 +126,10 @@
   /* The Sliding Menu Panel */
   .menuPanel {
     position: relative;
-    background: #0f172a;
+    background: var(--bg-slate-900);
     width: 100%;
     padding: 1.5rem;
-    border-bottom: 1px solid #334155;
+    border-bottom: 1px solid var(--border-slate);
     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     
     /* Animation: Slide Up/Down */
@@ -149,22 +149,22 @@
     gap: 1rem;
     margin-bottom: 1rem;
     padding: 0.5rem;
-    background: #1e293b;
+    background: var(--bg-slate-800);
     border-radius: 12px;
-    border: 1px solid #334155;
+    border: 1px solid var(--border-slate);
   }
 
   .avatar {
     width: 36px;
     height: 36px;
-    background: #334155;
-    color: #e2e8f0;
+    background: var(--bg-slate-700);
+    color: var(--text-strong);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 600;
-    border: 1px solid #475569;
+    border: 1px solid var(--border-slate-soft);
   }
 
   .userDetails {
@@ -172,8 +172,8 @@
     flex-direction: column;
   }
 
-  .welcome { font-size: 0.7rem; color: #94a3b8; text-transform: uppercase; }
-  .username { font-size: 0.95rem; color: #fff; font-weight: 600; }
+  .welcome { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; }
+  .username { font-size: 0.95rem; color: var(--text-white); font-weight: 600; }
 
   /* Navigation Links */
   .navLinks {
@@ -189,7 +189,7 @@
     padding: 0.9rem 1rem;
     background: transparent;
     border: none;
-    color: #cbd5e1;
+    color: var(--text-soft);
     font-size: 1rem;
     font-weight: 500;
     text-align: left;
@@ -200,15 +200,15 @@
 
   .linkItem:hover {
     background: rgba(59, 130, 246, 0.1);
-    color: #60a5fa;
+    color: var(--accent-blue-light);
   }
   
-  .linkItem svg { color: #64748b; transition: color 0.2s; }
-  .linkItem:hover svg { color: #3b82f6; }
+  .linkItem svg { color: var(--text-muted-2); transition: color 0.2s; }
+  .linkItem:hover svg { color: var(--accent-blue); }
 
   .divider {
     height: 1px;
-    background: #1e293b;
+    background: var(--bg-slate-800);
     margin: 1rem 0;
   }
 
@@ -222,7 +222,7 @@
     background: transparent;
     border: 1px solid rgba(239, 68, 68, 0.2);
     border-radius: 8px;
-    color: #ef4444;
+    color: var(--accent-red);
     font-weight: 600;
     font-size: 1rem;
     cursor: pointer;

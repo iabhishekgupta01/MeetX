@@ -22,15 +22,15 @@ function App() {
             <Route path="/" element={<LandingPage />} />
 
             <Route path="/auth" element={<Authentication />} />
-            
+
             <Route path="/dashboard" element={<ProtectedRoute element={<Dashboard />} />} />
-            
+
             <Route path="/meeting/:meetingId" element={<ProtectedRoute element={<MeetingPage />} />} />
-            
-            <Route path="/*"  element={<ProtectedRoute element={<VideoMeetComponent/>} />}  />
+
+            <Route path="/*" element={<ProtectedRoute element={<VideoMeetComponent />} />} />
 
           </Routes>
-        
+
 
         </AuthProvider>
       </BrowserRouter>

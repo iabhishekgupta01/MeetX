@@ -2,7 +2,7 @@
 .overlay {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0, 0, 0, 0.8);
+  background: var(--overlay-darker);
   backdrop-filter: blur(5px);
   display: flex;
   justify-content: center;
@@ -13,12 +13,12 @@
 }
 
 .modal {
-  background: #0f172a;
+  background: var(--bg-slate-900);
   width: 100%;
   max-width: 450px; /* Very compact width */
-  border-radius: 20px;
-  border: 1px solid #334155;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border-slate);
+  box-shadow: 0 25px 50px -12px var(--overlay-black-60);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -29,9 +29,9 @@
 /* --- 1. HERO HEADER --- */
 .heroHeader {
   /* This gradient makes it look modern */
-  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  background: linear-gradient(135deg, var(--bg-slate-800) 0%, var(--bg-slate-900) 100%);
   padding: 1.5rem;
-  border-bottom: 1px solid #334155;
+  border-bottom: 1px solid var(--border-slate);
   position: relative;
   display: flex;
   flex-direction: column;
@@ -47,7 +47,7 @@
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  color: #cbd5e1;
+  color: var(--text-soft);
   font-size: 1.2rem;
   display: flex;
   align-items: center;
@@ -58,7 +58,7 @@
 
 .closeBtn:hover {
   background: rgba(255, 255, 255, 0.2);
-  color: white;
+  color: var(--text-white);
 }
 
 .headerTop {
@@ -68,8 +68,8 @@
 }
 
 .badgeActive {
-  background: #22c55e;
-  color: #000;
+  background: var(--accent-green-2);
+  color: var(--brand-x);
   font-size: 0.7rem;
   font-weight: 800;
   padding: 2px 8px;
@@ -78,8 +78,8 @@
 }
 
 .badgeEnded {
-  background: #64748b;
-  color: #fff;
+  background: var(--text-muted-2);
+  color: var(--text-white);
   font-size: 0.7rem;
   font-weight: 700;
   padding: 2px 8px;
@@ -88,7 +88,7 @@
 }
 
 .dateBadge {
-  color: #94a3b8;
+  color: var(--text-muted);
   font-size: 0.8rem;
   font-weight: 500;
 }
@@ -96,7 +96,7 @@
 .title {
   margin: 0;
   font-size: 1.5rem;
-  color: white;
+  color: var(--text-white);
   font-weight: 700;
   line-height: 1.2;
 }
@@ -109,7 +109,7 @@
   gap: 0.8rem;
   margin-top: 0.2rem;
   font-size: 0.85rem;
-  color: #cbd5e1;
+  color: var(--text-soft);
 }
 
 .hostInfo {
@@ -121,35 +121,35 @@
 .hostAvatar {
   width: 20px;
   height: 20px;
-  background: linear-gradient(to right, #6366f1, #a855f7);
+  background: linear-gradient(to right, var(--accent-indigo), var(--accent-purple));
   border-radius: 50%;
   font-size: 0.6rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: var(--text-white);
   font-weight: bold;
 }
 
 .hostNameHighlight {
-  color: #e2e8f0;
+  color: var(--text-strong);
   font-weight: 600;
 }
 
 .verticalDivider {
   width: 1px;
   height: 12px;
-  background: #475569;
+  background: var(--border-slate-soft);
 }
 
 .timeInfo {
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  color: #94a3b8;
+  color: var(--text-muted);
 }
 
-.dot { font-size: 0.6rem; color: #475569; }
+.dot { font-size: 0.6rem; color: var(--border-slate-soft); }
 
 /* --- 2. BODY CONTENT --- */
 .body {
@@ -161,12 +161,12 @@
 .descriptionBox {
   padding: 1rem 1.5rem;
   background: rgba(30, 41, 59, 0.3);
-  border-bottom: 1px solid #1e293b;
+  border-bottom: 1px solid var(--bg-slate-800);
 }
 
 .descriptionBox p {
   margin: 0;
-  color: #cbd5e1;
+  color: var(--text-soft);
   font-size: 0.9rem;
   line-height: 1.5;
 }
@@ -188,12 +188,12 @@
   font-size: 0.9rem;
   text-transform: uppercase;
   letter-spacing: 1px;
-  color: #64748b;
+  color: var(--text-muted-2);
 }
 
 .countPill {
-  background: #1e293b;
-  color: #94a3b8;
+  background: var(--bg-slate-800);
+  color: var(--text-muted);
   padding: 2px 8px;
   border-radius: 12px;
   font-size: 0.75rem;
@@ -221,9 +221,9 @@
 .pAvatar {
   width: 36px;
   height: 36px;
-  background: #1e293b;
-  border: 1px solid #334155;
-  color: #94a3b8;
+  background: var(--bg-slate-800);
+  border: 1px solid var(--border-slate);
+  color: var(--text-muted);
   border-radius: 10px; /* Squircle shape */
   display: flex;
   align-items: center;
@@ -238,19 +238,19 @@
 }
 
 .pName {
-  color: #f1f5f9;
+  color: var(--text-bright);
   font-weight: 500;
   font-size: 0.95rem;
 }
 
 .pJoinTime {
   font-size: 0.75rem;
-  color: #64748b;
+  color: var(--text-muted-2);
 }
 
 .pDurationBadge {
   background: rgba(16, 185, 129, 0.1);
-  color: #10b981;
+  color: var(--accent-green);
   padding: 2px 6px;
   border-radius: 4px;
   font-size: 0.75rem;
@@ -259,7 +259,7 @@
 
 .emptyState {
   text-align: center;
-  color: #475569;
+  color: var(--border-slate-soft);
   font-style: italic;
   font-size: 0.9rem;
   margin-top: 1rem;

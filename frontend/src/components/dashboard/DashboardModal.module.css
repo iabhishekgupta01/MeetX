@@ -12,9 +12,9 @@
 }
 
 .modalContent {
-  background: #0f172a;
-  border: 1px solid #334155;
-  border-radius: 12px;
+  background: var(--bg-slate-900);
+  border: 1px solid var(--border-slate);
+  border-radius: var(--radius-md);
   width: 90%;
   max-width: 500px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
@@ -25,7 +25,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 1.5rem;
-  border-bottom: 1px solid #334155;
+  border-bottom: 1px solid var(--border-slate);
 }
 
 .modalHeader h2 {
@@ -36,14 +36,14 @@
 .closeBtn {
   background: none;
   border: none;
-  color: #94a3b8;
+  color: var(--text-muted);
   font-size: 2rem;
   cursor: pointer;
   transition: color 0.2s ease;
 }
 
 .closeBtn:hover {
-  color: #f1f5f9;
+  color: var(--text-bright);
 }
 
 .modalBody {
@@ -57,17 +57,17 @@
   display: flex;
   gap: 1rem;
   padding: 1.5rem;
-  border-top: 1px solid #334155;
+  border-top: 1px solid var(--border-slate);
 }
 
 .input,
 .textarea {
   width: 100%;
   padding: 0.8rem;
-  background: #1e293b;
-  border: 1px solid #334155;
+  background: var(--bg-slate-800);
+  border: 1px solid var(--border-slate);
   border-radius: 6px;
-  color: white;
+  color: var(--text-white);
   font-family: inherit;
   font-size: 1rem;
   transition: border-color 0.2s ease;
@@ -76,7 +76,7 @@
 .input:focus,
 .textarea:focus {
   outline: none;
-  border-color: #3b82f6;
+  border-color: var(--accent-blue);
 }
 
 .textarea {
@@ -91,21 +91,21 @@
   padding: 1rem;
   background: rgba(59, 130, 246, 0.1);
   border: 1px solid rgba(59, 130, 246, 0.3);
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
 }
 
 .durationLabel {
   font-weight: 600;
-  color: #e2e8f0;
+  color: var(--text-strong);
   font-size: 0.95rem;
 }
 
 .durationSelect {
   padding: 0.8rem;
-  background: #1e293b;
-  border: 1px solid #334155;
+  background: var(--bg-slate-800);
+  border: 1px solid var(--border-slate);
   border-radius: 6px;
-  color: white;
+  color: var(--text-white);
   font-family: inherit;
   font-size: 1rem;
   cursor: pointer;
@@ -113,13 +113,13 @@
 }
 
 .durationSelect:hover {
-  border-color: #3b82f6;
+  border-color: var(--accent-blue);
 }
 
 .durationSelect:focus {
   outline: none;
-  border-color: #3b82f6;
-  background: #0f172a;
+  border-color: var(--accent-blue);
+  background: var(--bg-slate-900);
 }
 
 .cancelBtn,
@@ -135,17 +135,17 @@
 }
 
 .cancelBtn {
-  background: #475569;
-  color: white;
+  background: var(--bg-slate-600);
+  color: var(--text-white);
 }
 
 .cancelBtn:hover {
-  background: #64748b;
+  background: var(--text-muted-2);
 }
 
 .confirmBtn {
-  background: linear-gradient(135deg, #16a34a, #22c55e);
-  color: white;
+  background: var(--gradient-green-alt);
+  color: var(--text-white);
 }
 
 .confirmBtn:hover {

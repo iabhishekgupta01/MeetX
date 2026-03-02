@@ -9,6 +9,7 @@ let timeOnline = {};
 let usernames = {}; // storing username for each socket.id
 let socketToMeeting = {}; // mapping socket.id to meetingId
 let socketToUserId = {}; // mapping socket.id to userId
+let captionModules = {}; // meetingId -> boolean
 
 const isMeetingExpired = (meeting) => {
     if (!meeting) return true;
@@ -107,6 +108,11 @@ module.exports = (server) => {
                     io.to(userSocketId).emit("user-joined", socket.id, clientsPayload);
                 });
 
+                io.to(socket.id).emit("caption-module-status", {
+                    meetingId,
+                    enabled: !!captionModules[meetingId]
+                });
+
                 if (messages[meetingId] != undefined) {
                     messages[meetingId].forEach((msg) => {
                         io.to(socket.id).emit("chat-message", msg['data'], msg['sender'], msg['socket-id-sender']);
@@ -142,6 +148,7 @@ module.exports = (server) => {
                 }
 
                 await finalizeMeeting(meeting);
+                delete captionModules[meetingId];
                 io.to(meetingId).emit("meeting-ended", { reason: "host-ended" });
 
                 const roomSockets = connections[meetingId] ? [...connections[meetingId]] : [];
@@ -223,6 +230,27 @@ module.exports = (server) => {
             }
         });
 
+        socket.on("live-caption", (payload) => {
+            try {
+                const meetingId = socketToMeeting[socket.id] || payload?.meetingId;
+                if (!meetingId || !connections[meetingId]) return;
+
+                const text = (payload?.text || "").toString().trim();
+                if (!text) return;
+
+                const username = usernames[socket.id] || payload?.username || "User";
+
+                io.to(meetingId).emit("live-caption-update", {
+                    socketId: socket.id,
+                    username,
+                    text,
+                    isFinal: !!payload?.isFinal
+                });
+            } catch (error) {
+                console.error("Error handling live caption:", error);
+            }
+        });
+
         socket.on("admin-remove-user", async (payload) => {
             try {
                 const { meetingId, userId, targetSocketId } = payload || {};
@@ -266,6 +294,28 @@ module.exports = (server) => {
             } catch (error) {
                 console.error("Error removing user via admin:", error);
                 socket.emit("admin-action-error", { message: "Failed to remove user" });
+            }
+        });
+
+        socket.on("admin-start-caption-module", async (payload) => {
+            try {
+                const { meetingId, userId } = payload || {};
+                if (!meetingId || !userId) {
+                    socket.emit("admin-action-error", { message: "Invalid admin payload" });
+                    return;
+                }
+
+                const meeting = await Meeting.findOne({ meetingId });
+                if (!meeting || meeting.hostId !== userId) {
+                    socket.emit("admin-action-error", { message: "Not authorized" });
+                    return;
+                }
+
+                captionModules[meetingId] = true;
+                io.to(meetingId).emit("caption-module-started", { meetingId });
+            } catch (error) {
+                console.error("Error starting caption module:", error);
+                socket.emit("admin-action-error", { message: "Failed to start caption module" });
             }
         });
 

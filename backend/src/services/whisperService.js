@@ -2,7 +2,7 @@ const { spawn } = require("child_process");
 const fs = require("fs");
 const path = require("path");
 
-exports.transcribeAudio = (wavFile) =>
+exports.transcribeAudio = (wavFile, options = {}) =>
   new Promise((resolve, reject) => {
     const outputDir = path.join(__dirname, "..", "..", "temp");
     const baseName = path.basename(wavFile, ".wav");
@@ -12,8 +12,10 @@ exports.transcribeAudio = (wavFile) =>
       fs.mkdirSync(outputDir, { recursive: true });
     }
 
-    const model = process.env.WHISPER_MODEL || "tiny";
-    const language = process.env.WHISPER_LANG || "hi";
+    const model = options.model || process.env.WHISPER_MODEL || "tiny";
+    const defaultLanguage = process.env.WHISPER_LANG || "hi";
+    const language = options.language === "auto" ? null : (options.language || defaultLanguage);
+    const task = options.task;
 
     const commonArgs = [
       "-m",
@@ -21,8 +23,8 @@ exports.transcribeAudio = (wavFile) =>
       wavFile,
       "--model",
       model,
-      "--language",
-      language,
+      ...(task ? ["--task", task] : []),
+      ...(language ? ["--language", language] : []),
       "--output_format",
       "txt",
       "--output_dir",

@@ -23,9 +23,9 @@
     justify-content: center;
     gap: 0.8rem;
     padding: 1.2rem;
-    border-radius: 16px;
+    border-radius: var(--radius-lg);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    color: white;
+    color: var(--text-white);
     cursor: pointer;
     transition: transform 0.2s;
     overflow: hidden;
@@ -46,7 +46,7 @@
 
   .createCard .iconWrapper {
     background: rgba(16, 185, 129, 0.25);
-    color: #34d399;
+    color: var(--accent-green-light);
   }
 
   /* 2. Join Card (Blue Theme) */
@@ -57,14 +57,14 @@
 
   .joinCard .iconWrapper {
     background: rgba(59, 130, 246, 0.25);
-    color: #60a5fa;
+    color: var(--accent-blue-light);
   }
 
   /* Icon Styling */
   .iconWrapper {
     width: 40px;
     height: 40px;
-    border-radius: 12px;
+    border-radius: var(--radius-md);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -80,14 +80,14 @@
   .title {
     font-size: 1rem;
     font-weight: 700;
-    color: #f1f5f9;
+    color: var(--text-bright);
     line-height: 1.2;
   }
 
   .subtitle {
     font-size: 0.75rem;
     font-weight: 500;
-    color: #94a3b8;
+    color: var(--text-muted);
   }
 }
 

@@ -15,7 +15,7 @@ const server = createServer(app);
 const io = connectToSocket(server);
 
 // 2. Use a fallback for the port
-const port = process.env.PORT || 8081; 
+const port = process.env.PORT || 5000; 
 
 // 3. Clean up the URL logic
 // It's safer to use the one from your .env, but I've put a fallback here

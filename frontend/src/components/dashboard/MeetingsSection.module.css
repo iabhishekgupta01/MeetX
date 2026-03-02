@@ -24,9 +24,9 @@
 
 /* --- Card Styles --- */
 .card {
-  background: #1e293b; /* Dark Slate */
-  border: 1px solid #334155;
-  border-radius: 16px;
+  background: var(--bg-slate-800); /* Dark Slate */
+  border: 1px solid var(--border-slate);
+  border-radius: var(--radius-lg);
   overflow: hidden;
   position: relative;
   display: flex;
@@ -40,20 +40,20 @@
 .card:hover {
   transform: translateY(-4px);
   box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.4);
-  border-color: #475569;
+  border-color: var(--border-slate-soft);
 }
 
 .cardCompleted {
   opacity: 0.8;
   /* subtle grayscale for history items */
   filter: grayscale(0.2); 
-  border-color: #1e293b;
+  border-color: var(--bg-slate-800);
 }
 
 .cardCompleted:hover {
   opacity: 1;
   filter: none;
-  border-color: #475569;
+  border-color: var(--border-slate-soft);
 }
 
 /* --- Decor Bar (Top of Card) --- */
@@ -63,11 +63,11 @@
 }
 
 .barHost { 
-  background: linear-gradient(90deg, #3b82f6, #60a5fa); 
+  background: linear-gradient(90deg, var(--accent-blue), var(--accent-blue-light)); 
 }
 
 .barGuest { 
-  background: linear-gradient(90deg, #10b981, #34d399); 
+  background: linear-gradient(90deg, var(--accent-green), var(--accent-green-light)); 
 }
 
 /* --- Card Content --- */
@@ -99,7 +99,7 @@
   margin: 0;
   font-size: 1.1rem;
   font-weight: 600;
-  color: #f1f5f9;
+  color: var(--text-bright);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -113,8 +113,8 @@
   text-transform: uppercase;
 }
 
-.roleHost { color: #60a5fa; }
-.roleGuest { color: #34d399; }
+.roleHost { color: var(--accent-blue-light); }
+.roleGuest { color: var(--accent-green-light); }
 
 /* --- Status Badges --- */
 .statusBadgeWrapper {
@@ -134,29 +134,29 @@
 /* Badge Colors */
 .safe { 
   background: rgba(16, 185, 129, 0.1); 
-  color: #34d399; 
+  color: var(--accent-green-light); 
 }
 
 .warn { 
   background: rgba(245, 158, 11, 0.1); 
-  color: #fbbf24; 
+  color: var(--accent-yellow-light); 
 }
 
 .urgent { 
   background: rgba(239, 68, 68, 0.1); 
-  color: #f87171; 
+  color: var(--accent-red-soft); 
   border: 1px solid rgba(239, 68, 68, 0.2); 
 }
 
 .expired { 
-  background: #0f172a; 
-  color: #64748b; 
-  border: 1px solid #334155;
+  background: var(--bg-slate-900); 
+  color: var(--text-muted-2); 
+  border: 1px solid var(--border-slate);
 }
 
 .badgeFinished {
-  background: #334155;
-  color: #94a3b8;
+  background: var(--bg-slate-700);
+  color: var(--text-muted);
   font-size: 0.75rem;
   padding: 4px 8px;
   border-radius: 6px;
@@ -182,10 +182,10 @@
 /* 1. Primary Action (Join) */
 .btnJoin {
   flex: 1;
-  background: #3b82f6;
+  background: var(--accent-blue);
   border: none;
-  border-radius: 8px;
-  color: white;
+  border-radius: var(--radius-sm);
+  color: var(--text-white);
   font-weight: 600;
   font-size: 0.9rem;
   padding: 0.7rem;
@@ -194,23 +194,23 @@
 }
 
 .btnJoin:hover:not(:disabled) { 
-  background: #2563eb; 
+  background: var(--accent-blue-dark); 
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
 }
 
 .btnJoin:disabled { 
-  background: #334155; 
-  color: #64748b; 
+  background: var(--bg-slate-700); 
+  color: var(--text-muted-2); 
   cursor: not-allowed; 
 }
 
 /* 2. Secondary Action (View Details - History) */
 .btnDetails {
   flex: 1;
-  background: #334155;
-  border: 1px solid #475569;
-  border-radius: 8px;
-  color: #e2e8f0;
+  background: var(--bg-slate-700);
+  border: 1px solid var(--border-slate-soft);
+  border-radius: var(--radius-sm);
+  color: var(--text-strong);
   font-weight: 600;
   font-size: 0.9rem;
   padding: 0.7rem;
@@ -219,27 +219,27 @@
 }
 
 .btnDetails:hover {
-  background: #475569;
-  color: #fff;
+  background: var(--border-slate-soft);
+  color: var(--text-white);
 }
 
 /* 3. Share Button */
 .btnShare {
   background: transparent;
-  border: 1px solid #475569;
-  color: #94a3b8;
+  border: 1px solid var(--border-slate-soft);
+  color: var(--text-muted);
   width: 42px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .btnShare:hover {
-  border-color: #cbd5e1;
-  color: #fff;
+  border-color: var(--text-soft);
+  color: var(--text-white);
   background: rgba(255,255,255,0.05);
 }
 
@@ -256,9 +256,9 @@
 
 .filterPill {
   white-space: nowrap;
-  background: #0f172a;
-  border: 1px solid #334155;
-  color: #94a3b8;
+  background: var(--bg-slate-900);
+  border: 1px solid var(--border-slate);
+  color: var(--text-muted);
   padding: 0.5rem 1rem;
   border-radius: 99px;
   font-size: 0.85rem;
@@ -271,23 +271,23 @@
 }
 
 .filterPill:hover {
-  background: #1e293b;
-  color: #e2e8f0;
+  background: var(--bg-slate-800);
+  color: var(--text-strong);
 }
 
 .pillActive {
-  background: #3b82f6;
-  border-color: #3b82f6;
-  color: white;
+  background: var(--accent-blue);
+  border-color: var(--accent-blue);
+  color: var(--text-white);
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
 }
 
 .pillActive:hover {
-  background: #2563eb;
+  background: var(--accent-blue-dark);
 }
 
 .count {
-  background: #1e293b;
+  background: var(--bg-slate-800);
   font-size: 0.7rem;
   padding: 2px 8px;
   border-radius: 10px;
@@ -297,7 +297,7 @@
 
 .pillActive .count {
   background: rgba(255,255,255,0.2);
-  color: white;
+  color: var(--text-white);
 }
 
 /* --- Empty State --- */
@@ -308,10 +308,10 @@
   align-items: center;
   justify-content: center;
   padding: 4rem 1rem;
-  color: #64748b;
+  color: var(--text-muted-2);
   background: rgba(30, 41, 59, 0.3);
-  border-radius: 16px;
-  border: 2px dashed #334155;
+  border-radius: var(--radius-lg);
+  border: 2px dashed var(--border-slate);
   min-height: 250px;
 }
 
@@ -325,7 +325,7 @@
   margin: 0; 
   font-size: 1.1rem; 
   font-weight: 600; 
-  color: #94a3b8; 
+  color: var(--text-muted); 
 }
 
 .emptyState span { 
@@ -349,9 +349,90 @@
 @media (max-width: 600px) {
   .grid {
     grid-template-columns: 1fr; /* Stack cards vertically on phones */
+    gap: 0.7rem;
   }
   
   .card {
-    min-height: auto; /* Allow auto height on mobile */
+    min-height: 0;
+    border-radius: 12px;
+    box-shadow: none;
+  }
+
+  .card:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  .decorBar {
+    height: 3px;
+  }
+
+  .cardContent {
+    padding: 0.75rem 0.8rem;
+    gap: 0.65rem;
+  }
+
+  .cardHeader {
+    gap: 0.55rem;
+  }
+
+  .title {
+    font-size: 0.95rem;
+    line-height: 1.2;
+  }
+
+  .roleHost,
+  .roleGuest {
+    font-size: 0.58rem;
+  }
+
+  .timeBadge,
+  .badgeFinished {
+    font-size: 0.68rem;
+    padding: 3px 7px;
+    border-radius: 5px;
+  }
+
+  .cardFooter {
+    gap: 0.55rem;
+  }
+
+  .btnJoin,
+  .btnDetails {
+    padding: 0.56rem;
+    font-size: 0.78rem;
+    border-radius: 7px;
+  }
+
+  .btnShare {
+    width: 36px;
+    min-width: 36px;
+    border-radius: 7px;
+  }
+
+  .btnShare svg {
+    width: 15px;
+    height: 15px;
+  }
+}
+
+@media (max-width: 420px) {
+  .cardContent {
+    padding: 0.68rem 0.72rem;
+  }
+
+  .title {
+    font-size: 0.9rem;
+  }
+
+  .btnJoin,
+  .btnDetails {
+    padding: 0.5rem;
+    font-size: 0.74rem;
+  }
+
+  .btnShare {
+    width: 34px;
+    min-width: 34px;
   }
 }

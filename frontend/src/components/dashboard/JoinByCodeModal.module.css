@@ -2,7 +2,7 @@
 .modalOverlay {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0, 0, 0, 0.75);
+  background: var(--overlay-dark);
   backdrop-filter: blur(4px);
   display: flex;
   justify-content: center;
@@ -13,11 +13,11 @@
 
 /* Compact Card */
 .compactModal {
-  background: #0f172a;
+  background: var(--bg-slate-900);
   width: 100%;
   max-width: 400px; /* Kept it narrow */
-  border-radius: 16px;
-  border: 1px solid #334155;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-slate);
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
   overflow: hidden;
   font-family: 'Inter', sans-serif;
@@ -31,8 +31,8 @@
   justify-content: space-between;
   align-items: center;
   padding: 1.2rem 1.5rem;
-  background: #1e293b;
-  border-bottom: 1px solid #334155;
+  background: var(--bg-slate-800);
+  border-bottom: 1px solid var(--border-slate);
 }
 
 .titleGroup {
@@ -45,13 +45,13 @@
   margin: 0;
   font-size: 1.1rem;
   font-weight: 600;
-  color: #f8fafc;
+  color: var(--text-main);
 }
 
 .closeBtn {
   background: none;
   border: none;
-  color: #64748b;
+  color: var(--text-muted-2);
   font-size: 1.8rem;
   line-height: 1;
   cursor: pointer;
@@ -60,7 +60,7 @@
 }
 
 .closeBtn:hover {
-  color: #cbd5e1;
+  color: var(--text-soft);
 }
 
 /* Body */
@@ -73,7 +73,7 @@
 }
 
 .subText {
-  color: #94a3b8;
+  color: var(--text-muted);
   font-size: 0.9rem;
   margin: 0;
   text-align: center;
@@ -85,11 +85,11 @@
 
 .codeInput {
   width: 100%;
-  background: #020617;
-  border: 2px solid #334155;
-  border-radius: 12px;
+  background: var(--bg-slate-950);
+  border: 2px solid var(--border-slate);
+  border-radius: var(--radius-md);
   padding: 1rem;
-  color: #fff;
+  color: var(--text-white);
   font-size: 1.5rem;
   font-family: monospace;
   font-weight: 700;
@@ -101,13 +101,13 @@
 }
 
 .codeInput:focus {
-  border-color: #3b82f6;
+  border-color: var(--accent-blue);
   box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
   transform: scale(1.02);
 }
 
 .codeInput::placeholder {
-  color: #334155;
+  color: var(--border-slate);
   letter-spacing: 1px;
 }
 
@@ -121,7 +121,7 @@
 
 .cancelBtn, .joinBtn {
   padding: 0.8rem;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   font-weight: 600;
   font-size: 0.95rem;
   cursor: pointer;
@@ -131,18 +131,18 @@
 
 .cancelBtn {
   background: transparent;
-  color: #94a3b8;
-  border: 1px solid #334155;
+  color: var(--text-muted);
+  border: 1px solid var(--border-slate);
 }
 
 .cancelBtn:hover {
-  background: #1e293b;
-  color: #e2e8f0;
+  background: var(--bg-slate-800);
+  color: var(--text-strong);
 }
 
 .joinBtn {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  color: white;
+  background: var(--gradient-blue);
+  color: var(--text-white);
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
 }
 

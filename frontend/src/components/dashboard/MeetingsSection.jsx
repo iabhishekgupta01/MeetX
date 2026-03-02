@@ -92,17 +92,18 @@ function MeetingsSection({
               {isCompleted ? "View Details" : "Join Now"}
             </button>
 
-            {/* Share button remains enabled for both (to share results or links) */}
-            <button
-              className={styles.btnShare}
-              onClick={(e) => {
-                e.stopPropagation();
-                onShareMeeting(meeting);
-              }}
-              title="Share Meeting"
-            >
-              <ShareIcon />
-            </button>
+            {!isCompleted && expiration.type !== "expired" && (
+              <button
+                className={styles.btnShare}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onShareMeeting(meeting);
+                }}
+                title="Share Meeting"
+              >
+                <ShareIcon />
+              </button>
+            )}
           </div>
         </div>
       </div>

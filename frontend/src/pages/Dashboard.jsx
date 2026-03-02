@@ -27,7 +27,7 @@ function Dashboard() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [meetingTitle, setMeetingTitle] = useState("");
   const [meetingDescription, setMeetingDescription] = useState("");
-  const [meetingDuration, setMeetingDuration] = useState(24); // default 24 hours
+  const [meetingDuration, setMeetingDuration] = useState(30); // default 30 minutes
   const [showShareModal, setShowShareModal] = useState(false);
   const [selectedMeeting, setSelectedMeeting] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
@@ -85,14 +85,14 @@ function Dashboard() {
         hostName: username,
         title: meetingTitle,
         description: meetingDescription,
-        durationHours: meetingDuration,
+        durationMinutes: meetingDuration,
       });
 
       const newMeeting = response.data.meeting;
       setHostedMeetings([newMeeting, ...hostedMeetings]);
       setMeetingTitle("");
       setMeetingDescription("");
-      setMeetingDuration(24); // reset to default
+      setMeetingDuration(30); // reset to default
       setShowCreateModal(false);
 
       // Redirect to meeting
@@ -178,7 +178,13 @@ function Dashboard() {
     setDetailLoading(true);
 
     try {
-      const response = await axios.get(`${serverUrl}/api/v1/meeting/${meeting.meetingId}`);
+      const detailMeetingId = meeting?.meetingId;
+      if (!detailMeetingId) {
+        setDetailError("Meeting details are unavailable.");
+        return;
+      }
+
+      const response = await axios.get(`${serverUrl}/api/v1/meeting/${detailMeetingId}?includeInactive=true`);
       if (response.data?.meeting) {
         setSelectedDetailMeeting(response.data.meeting);
       }

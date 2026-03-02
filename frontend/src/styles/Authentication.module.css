@@ -3,7 +3,7 @@
 ========================= */
 .page {
   min-height: 100vh;
-  background-color: #0b1120;
+  background-color: var(--bg-page-auth);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -15,14 +15,15 @@
 ========================= */
 .authBox {
   width: 900px;
-  height: 520px; /* fixed height for stability */
+  height: 520px;
+  /* fixed height for stability */
   display: flex;
-  border-radius: 22px;
+  border-radius: var(--radius-xl);
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--border-color);
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.6);
+  border: 1px solid var(--surface-white-20);
+  box-shadow: 0 30px 70px var(--overlay-black-60);
 }
 
 /* =========================
@@ -30,7 +31,7 @@
 ========================= */
 .imagePanel {
   width: 45%;
-  background-color: #111827;
+  background-color: var(--bg-panel-auth);
   padding: 40px;
   display: flex;
   flex-direction: column;
@@ -46,12 +47,12 @@
 }
 
 .imagePanel h3 {
-  color: #ffffff;
+  color: var(--text-white);
   margin-bottom: 10px;
 }
 
 .imagePanel p {
-  color: #9ca3af;
+  color: var(--text-muted);
   font-size: 0.9rem;
 }
 
@@ -70,12 +71,12 @@
    TEXT
 ========================= */
 .formPanel h2 {
-  color: #ffffff;
+  color: var(--text-white);
   margin-bottom: 6px;
 }
 
 .subtitle {
-  color: #cbd5f5;
+  color: var(--text-brand-muted);
   font-size: 0.9rem;
   margin-bottom: 18px;
 }
@@ -85,8 +86,8 @@
 ========================= */
 .tabs {
   display: flex;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
+  background: var(--border-weak);
+  border-radius: var(--radius-md);
   margin-bottom: 25px;
   overflow: hidden;
 }
@@ -97,15 +98,15 @@
   border: none;
   cursor: pointer;
   background: transparent;
-  color: #c7d2fe;
+  color: var(--text-brand-soft);
   font-weight: 600;
   transition: background 0.25s ease;
 }
 
 .active {
-  background: rgba(255, 255, 255, 0.2);
-  color: #ffffff;
-  background-color: #4338ca !important;
+  background: var(--surface-white-20);
+  color: var(--text-white);
+  background-color: var(--primary-700) !important;
 }
 
 /* =========================
@@ -123,13 +124,13 @@
   border-radius: 10px;
   border: none;
   outline: none;
-  background: rgba(255, 255, 255, 0.15);
-  color: #ffffff;
+  background: var(--surface-white-15);
+  color: var(--text-white);
   font-size: 0.95rem;
 }
 
 .formPanel input::placeholder {
-  color: #d1d5db;
+  color: var(--text-placeholder);
 }
 
 /* Reserve space so inputs never jump */
@@ -143,18 +144,17 @@
 .formPanel button[type="submit"] {
   margin-top: 10px;
   padding: 12px;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   border: none;
   cursor: pointer;
   font-weight: 600;
   font-size: 1rem;
-  background-color: #4f46e5;
-  color: #ffffff;
+  background-color: var(--primary-600);
+  color: var(--text-white);
   transition: background 0.2s ease, transform 0.2s ease;
 }
 
 .formPanel button:hover {
-  /* background-color: #4338ca; */
   transform: translateY(-2px);
 }
 
@@ -168,18 +168,18 @@
 ========================= */
 .error {
   background-color: rgba(239, 68, 68, 0.2);
-  color: #fecaca;
+  color: var(--text-danger-soft);
   padding: 8px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   font-size: 0.85rem;
   margin-bottom: 10px;
 }
 
 .success {
   background-color: rgba(34, 197, 94, 0.2);
-  color: #bbf7d0;
+  color: var(--text-success-soft);
   padding: 8px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   font-size: 0.85rem;
   margin-bottom: 10px;
 }
@@ -197,7 +197,7 @@
   }
 
   .imagePanel {
-    display: none; 
+    display: none;
   }
 
   .formPanel {

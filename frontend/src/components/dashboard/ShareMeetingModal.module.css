@@ -79,7 +79,7 @@
 
 .inputWrapper input {
   width: 100%;
-  background: #fffaf0;
+  background: var(--share-input-bg);
   border: 1px solid var(--border-color);
   padding: 0.85rem 1rem;
   padding-right: 3rem; /* Space for the button */
@@ -105,7 +105,7 @@
 .copyIconBtn {
   position: absolute;
   right: 8px;
-  background: #efe3ce;
+  background: var(--share-icon-bg);
   border: none;
   border-radius: 6px;
   width: 32px;
@@ -124,7 +124,7 @@
 }
 
 .copyIconBtn:hover {
-  background: #e4d6bf;
+  background: var(--share-icon-bg-hover);
   color: var(--text-main);
 }
 
@@ -176,7 +176,7 @@
   justify-content: center;
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s;
-  color: #ffffff;
+  color: var(--text-white);
 }
 
 .socialBtn svg {
@@ -190,17 +190,17 @@
 }
 
 /* Brand Colors */
-.wa { background: #25D366; }
-.wa:hover { background: #1ebc57; }
+.wa { background: var(--brand-wa); }
+.wa:hover { background: var(--brand-wa-hover); }
 
-.em { background: #ea4335; }
-.em:hover { background: #d62516; }
+.em { background: var(--brand-email); }
+.em:hover { background: var(--brand-email-hover); }
 
-.tw { background: #000; border: 1px solid #333; }
-.tw:hover { background: #111; border-color: #555; }
+.tw { background: var(--brand-x); border: 1px solid var(--brand-x-border); }
+.tw:hover { background: var(--brand-x-hover); border-color: var(--brand-x-border-hover); }
 
-.fb { background: #1877F2; }
-.fb:hover { background: #166fe5; }
+.fb { background: var(--brand-fb); }
+.fb:hover { background: var(--brand-fb-hover); }
 
 /* Mobile Optimization */
 @media (max-width: 480px) {

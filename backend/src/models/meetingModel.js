@@ -57,6 +57,10 @@ const meetingSchema=new Schema({
         type:Date,
         default:Date.now()
     },
+    scheduledFor:{
+        type:Date,
+        default:null
+    },
     startedAt:{
         type:Date,
         default:null
@@ -73,6 +77,34 @@ const meetingSchema=new Schema({
         type:String,
         default:""
     },
+    captionsJsonText:{
+        type:String,
+        default:""
+    },
+    liveCaptions:[
+        {
+            timestamp:{
+                type:Date,
+                required:true
+            },
+            socketId:{
+                type:String,
+                required:true
+            },
+            userId:{
+                type:String,
+                default:""
+            },
+            username:{
+                type:String,
+                required:true
+            },
+            text:{
+                type:String,
+                required:true
+            }
+        }
+    ],
     summary:{
         type:String,
         default:""
