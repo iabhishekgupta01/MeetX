@@ -1,5 +1,6 @@
 import React from "react";
 import styles from "./MeetingsSection.module.css";
+import CompletedMeetingModule from "./CompletedMeetingModule";
 
 function MeetingsSection({
   activeTab,
@@ -158,7 +159,15 @@ function MeetingsSection({
                 <p>No meeting history found.</p>
               </div>
             ) : (
-              completedMeetings.map(m => renderMeetingCard(m, true))
+              <div className={styles.completedList}>
+                {completedMeetings.map((m) => (
+                  <CompletedMeetingModule
+                    key={m._id || m.meetingId}
+                    meeting={m}
+                    onOpenDetail={onOpenDetail}
+                  />
+                ))}
+              </div>
             )}
           </div>
         </div>

@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useContext, useRef } from "react";
+import React, { useState, useEffect, useContext, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { AuthContext } from "../contexts/AuthContext";
@@ -12,6 +12,11 @@ import JoinByCodeModal from "../components/dashboard/JoinByCodeModal";
 import CreateMeetingModal from "../components/dashboard/CreateMeetingModal";
 import ShareMeetingModal from "../components/dashboard/ShareMeetingModal";
 import MeetingDetailModal from "../components/dashboard/MeetingDetailModal";
+import AnalyticsSection from "../components/dashboard/analytics/AnalyticsSection";
+import MeetingActivityChart from "../components/dashboard/analytics/MeetingActivityChart";
+import RecentActivityFeed from "../components/dashboard/analytics/RecentActivityFeed";
+import UpcomingMeetingsPanel from "../components/dashboard/analytics/UpcomingMeetingsPanel";
+import MeetingInsights from "../components/dashboard/analytics/MeetingInsights";
 import styles from "../styles/Dashboard.module.css";
 
 
@@ -37,8 +42,10 @@ function Dashboard() {
   const [showJoinByCodeModal, setShowJoinByCodeModal] = useState(false);
   const [meetingCode, setMeetingCode] = useState("");
   const [activeTab, setActiveTab] = useState("scheduled"); // scheduled or completed
+  const [activeSection, setActiveSection] = useState("meetings"); // meetings or analytics
   const [completedFilter, setCompletedFilter] = useState("all"); // all, hosted, participated
   const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const meetingsSectionRef = useRef(null);
 
@@ -345,12 +352,201 @@ function Dashboard() {
   };
 
   const handleTabChange = (tab) => {
+    setActiveSection("meetings");
     setActiveTab(tab);
     if (window.innerWidth <= 768 && meetingsSectionRef.current) {
       meetingsSectionRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
     }
     setIsMobileMenuOpen(false);
   };
+
+  const openMeetingsSection = () => {
+    setActiveSection("meetings");
+    setIsMobileMenuOpen(false);
+  };
+
+  const openAnalyticsSection = () => {
+    setActiveSection("analytics");
+    fetchMeetings();
+    setIsMobileMenuOpen(false);
+  };
+
+  const handleStatusFilterChange = (value) => {
+    setStatusFilter(value);
+    setActiveSection("meetings");
+    if (value === "completed") {
+      handleTabChange("completed");
+      return;
+    }
+    if (value === "upcoming") {
+      handleTabChange("scheduled");
+    }
+  };
+
+  const formatDurationFromSeconds = (seconds) => {
+    if (!seconds || Number.isNaN(seconds)) return "0m";
+    const totalMinutes = Math.max(1, Math.floor(seconds / 60));
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    if (hours === 0) return `${minutes}m`;
+    return `${hours}h ${minutes}m`;
+  };
+
+  const getDurationSeconds = (meeting) => {
+    if (meeting?.duration && Number.isFinite(meeting.duration)) return meeting.duration;
+    const startedAt = meeting?.startedAt || meeting?.createdAt;
+    const endedAt = meeting?.endedAt;
+    if (!startedAt || !endedAt) return 0;
+    const diff = Math.floor((new Date(endedAt) - new Date(startedAt)) / 1000);
+    return diff > 0 ? diff : 0;
+  };
+
+  const formatUpcomingLabel = (value) => {
+    if (!value) return "No date";
+    const date = new Date(value);
+    const now = new Date();
+    const oneDayMs = 1000 * 60 * 60 * 24;
+    const diffDays = Math.floor((date.setHours(0, 0, 0, 0) - now.setHours(0, 0, 0, 0)) / oneDayMs);
+    const time = new Date(value).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    if (diffDays === 0) return `Today ${time}`;
+    if (diffDays === 1) return `Tomorrow ${time}`;
+    return `${new Date(value).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })} ${time}`;
+  };
+
+  const analyticsData = useMemo(() => {
+    const allMeetings = getAllMeetingsUnique();
+    const completedMeetingsAll = mergeMeetingsByStatus(true);
+    const upcomingMeetingsAll = mergeMeetingsByStatus(false);
+
+    const totalDurationSec = allMeetings.reduce((sum, meeting) => sum + getDurationSeconds(meeting), 0);
+
+    const now = new Date();
+    const activityMap = new Map();
+    const activityPoints = [];
+    for (let i = 6; i >= 0; i -= 1) {
+      const d = new Date(now);
+      d.setDate(now.getDate() - i);
+      const key = d.toISOString().slice(0, 10);
+      activityMap.set(key, 0);
+      activityPoints.push({
+        key,
+        label: d.toLocaleDateString(undefined, { weekday: "short" }),
+        count: 0,
+      });
+    }
+
+    allMeetings.forEach((meeting) => {
+      const dateSource = meeting?.createdAt || meeting?.startedAt || meeting?.endedAt;
+      if (!dateSource) return;
+      const key = new Date(dateSource).toISOString().slice(0, 10);
+      if (activityMap.has(key)) {
+        activityMap.set(key, activityMap.get(key) + 1);
+      }
+    });
+
+    const activityChartData = activityPoints.map((point) => ({
+      label: point.label,
+      count: activityMap.get(point.key) || 0,
+    }));
+
+    const recentActivity = allMeetings
+      .map((meeting) => {
+        const completed = isMeetingCompleted(meeting);
+        const dateSource = completed ? (meeting?.endedAt || meeting?.createdAt) : (meeting?.createdAt || meeting?.startedAt);
+        return {
+          text: completed
+            ? `Meeting completed: ${meeting?.title || "Untitled Meeting"}`
+            : `Meeting created: ${meeting?.title || "Untitled Meeting"}`,
+          date: dateSource ? new Date(dateSource) : new Date(0),
+        };
+      })
+      .sort((a, b) => b.date - a.date)
+      .slice(0, 5)
+      .map((item) => ({
+        text: item.text,
+        time: item.date.toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }),
+      }));
+
+    const upcomingList = upcomingMeetingsAll
+      .sort((a, b) => new Date(a.scheduledFor || a.createdAt) - new Date(b.scheduledFor || b.createdAt))
+      .slice(0, 5)
+      .map((meeting) => ({
+        ...meeting,
+        whenText: formatUpcomingLabel(meeting?.scheduledFor || meeting?.createdAt),
+        participantsCount: (meeting?.participants || []).length,
+      }));
+
+    const participantFrequency = new Map();
+    allMeetings.forEach((meeting) => {
+      (meeting?.participants || []).forEach((participant) => {
+        const key = participant?.userId || participant?.username;
+        if (!key) return;
+        participantFrequency.set(key, {
+          name: participant?.username || "Guest",
+          count: (participantFrequency.get(key)?.count || 0) + 1,
+        });
+      });
+    });
+
+    const mostActive = Array.from(participantFrequency.values()).sort((a, b) => b.count - a.count)[0];
+
+    const completedDurations = completedMeetingsAll.map((meeting) => ({
+      title: meeting?.title || "Untitled Meeting",
+      duration: getDurationSeconds(meeting),
+    }));
+
+    const totalCompletedDuration = completedDurations.reduce((sum, item) => sum + item.duration, 0);
+    const averageDuration = completedDurations.length
+      ? formatDurationFromSeconds(Math.floor(totalCompletedDuration / completedDurations.length))
+      : "--";
+
+    const longestMeeting = completedDurations.sort((a, b) => b.duration - a.duration)[0];
+
+    const cards = [
+      {
+        title: "Total Meetings",
+        value: String(allMeetings.length),
+        description: "All hosted and joined meetings",
+        icon: "📊",
+        tone: "blue",
+      },
+      {
+        title: "Completed Meetings",
+        value: String(completedMeetingsAll.length),
+        description: "Meetings marked finished",
+        icon: "✅",
+        tone: "green",
+      },
+      {
+        title: "Upcoming Meetings",
+        value: String(upcomingMeetingsAll.length),
+        description: "Scheduled and active sessions",
+        icon: "📅",
+        tone: "amber",
+      },
+      {
+        title: "Total Meeting Time",
+        value: formatDurationFromSeconds(totalDurationSec),
+        description: "Combined duration",
+        icon: "⏱",
+        tone: "violet",
+      },
+    ];
+
+    return {
+      cards,
+      activityChartData,
+      recentActivity,
+      upcomingList,
+      insights: {
+        mostActiveParticipant: mostActive ? `${mostActive.name} (${mostActive.count})` : "--",
+        averageDuration,
+        longestMeeting: longestMeeting
+          ? `${longestMeeting.title} (${formatDurationFromSeconds(longestMeeting.duration)})`
+          : "--",
+      },
+    };
+  }, [hostedMeetings, participatedMeetings, getAllMeetingsUnique, isMeetingCompleted, mergeMeetingsByStatus]);
 
   if (loading) {
     return <div className={styles.loading}>Loading your dashboard...</div>;
@@ -360,49 +556,89 @@ function Dashboard() {
     <div className={styles.dashboardLayout}>
       <DashboardSidebar
         username={localStorage.getItem("username") || "User"}
+        activeSection={activeSection}
+        onOpenMeetings={openMeetingsSection}
+        onOpenAnalytics={openAnalyticsSection}
         onCreateMeeting={() => setShowCreateModal(true)}
         onJoinByCode={() => setShowJoinByCodeModal(true)}
         onRefresh={fetchMeetings}
+        onLogout={handleLogoutClick}
       />
 
       <main className={styles.mainContent}>
         <DashboardMobileNav
           isMenuOpen={isMobileMenuOpen}
+          username={localStorage.getItem("username") || "User"}
+          activeSection={activeSection}
           onToggleMenu={() => setIsMobileMenuOpen((prev) => !prev)}
           onNavigateHome={() => navigate("/")}
+          onGoMeetings={openMeetingsSection}
           onGoScheduled={() => handleTabChange("scheduled")}
           onGoCompleted={() => handleTabChange("completed")}
+          onGoAnalytics={openAnalyticsSection}
           onLogout={handleLogoutClick}
         />
 
-        <DashboardMobileActions
-          onCreateMeeting={() => setShowCreateModal(true)}
-          onJoinByCode={() => setShowJoinByCodeModal(true)}
-        />
+        {activeSection === "meetings" ? (
+          <>
+            <DashboardMobileActions
+              onCreateMeeting={() => setShowCreateModal(true)}
+              onJoinByCode={() => setShowJoinByCodeModal(true)}
+            />
 
-        <DashboardTopBar
-          activeTab={activeTab}
-          onTabChange={handleTabChange}
-          scheduledCount={getScheduledMeetings().length}
-          completedCount={getCompletedMeetings().length}
-        />
+            <DashboardTopBar
+              activeTab={activeTab}
+              onTabChange={handleTabChange}
+              scheduledCount={getScheduledMeetings().length}
+              completedCount={getCompletedMeetings().length}
+            />
 
-        <MeetingsSection
-          activeTab={activeTab}
-          completedFilter={completedFilter}
-          onCompletedFilterChange={setCompletedFilter}
-          scheduledMeetings={getScheduledMeetings()}
-          completedMeetings={getCompletedMeetings()}
-          completedCounts={{
-            all: mergeMeetingsByStatus(true).length,
-            hosted: getCompletedMeetingsByRole("host").length,
-            participated: getCompletedMeetingsByRole("participant").length,
-          }}
-          onOpenDetail={openDetailModal}
-          onJoinMeeting={joinMeeting}
-          onShareMeeting={openShareModal}
-          sectionRef={meetingsSectionRef}
-        />
+            <MeetingsSection
+              activeTab={activeTab}
+              completedFilter={completedFilter}
+              onCompletedFilterChange={setCompletedFilter}
+              scheduledMeetings={getScheduledMeetings()}
+              completedMeetings={getCompletedMeetings()}
+              completedCounts={{
+                all: mergeMeetingsByStatus(true).length,
+                hosted: getCompletedMeetingsByRole("host").length,
+                participated: getCompletedMeetingsByRole("participant").length,
+              }}
+              onOpenDetail={openDetailModal}
+              onJoinMeeting={joinMeeting}
+              onShareMeeting={openShareModal}
+              sectionRef={meetingsSectionRef}
+            />
+          </>
+        ) : (
+          <section className={styles.analyticsStack}>
+            <div className={styles.analyticsHeaderRow}>
+              <div>
+                <h2 className={styles.analyticsTitle}>Analytics</h2>
+                <p className={styles.analyticsSub}>Insights and trends from your meetings</p>
+              </div>
+            </div>
+
+            <AnalyticsSection
+              cards={analyticsData.cards}
+              searchTerm={searchTerm}
+              onSearchChange={setSearchTerm}
+              statusFilter={statusFilter}
+              onStatusFilterChange={handleStatusFilterChange}
+            />
+
+            <div className={styles.analyticsGrid}>
+              <MeetingActivityChart data={analyticsData.activityChartData} />
+
+              <div className={styles.analyticsSideColumn}>
+                <RecentActivityFeed items={analyticsData.recentActivity} />
+                <UpcomingMeetingsPanel meetings={analyticsData.upcomingList} />
+              </div>
+            </div>
+
+            <MeetingInsights insights={analyticsData.insights} />
+          </section>
+        )}
 
         {showJoinByCodeModal && (
           <JoinByCodeModal

@@ -14,6 +14,41 @@
   gap: 1.5rem;
 }
 
+.analyticsStack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.95rem;
+}
+
+.analyticsHeaderRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.analyticsTitle {
+  margin: 0;
+  color: var(--text-white);
+  font-size: 1.1rem;
+}
+
+.analyticsSub {
+  margin: 0.2rem 0 0;
+  color: var(--text-muted-2);
+  font-size: 0.8rem;
+}
+
+.analyticsGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: 0.85rem;
+}
+
+.analyticsSideColumn {
+  display: grid;
+  gap: 0.85rem;
+}
+
 .loading {
   min-height: 100vh;
   display: flex;
@@ -30,5 +65,22 @@
 
   .mainContent {
     padding: 1.5rem;
+  }
+
+  .analyticsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .analyticsStack {
+    gap: 0.8rem;
+  }
+
+  .analyticsTitle {
+    font-size: 1rem;
+  }
+
+  .analyticsSub {
+    font-size: 0.75rem;
+    display: none;
   }
 }

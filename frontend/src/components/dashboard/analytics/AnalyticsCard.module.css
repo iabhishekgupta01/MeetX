@@ -1,0 +1,107 @@
+.card {
+  background: #18202b;
+  border: 1px solid #32475f;
+  border-radius: 14px;
+  padding: 0.72rem 0.74rem;
+  box-shadow: 0 10px 20px -16px rgba(0, 0, 0, 0.6);
+  min-height: 92px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.toneBlue {
+  background: #1d2a39;
+  border-color: #3e5d80;
+}
+
+.toneGreen {
+  background: #1f3129;
+  border-color: #4a715c;
+}
+
+.toneAmber {
+  background: #322a1e;
+  border-color: #7b6645;
+}
+
+.toneViolet {
+  background: #2b2336;
+  border-color: #665083;
+}
+
+.topRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.title {
+  font-size: 0.74rem;
+  color: var(--text-muted-2);
+  font-weight: 600;
+}
+
+.icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-white);
+  background: rgba(255, 255, 255, 0.12);
+  font-size: 0.76rem;
+}
+
+.value {
+  margin: 0.34rem 0 0.12rem;
+  font-size: 1.02rem;
+  line-height: 1.1;
+  font-weight: 700;
+  color: var(--text-white);
+}
+
+.description {
+  margin: 0;
+  font-size: 0.68rem;
+  color: var(--text-muted);
+}
+
+@media (max-width: 640px) {
+  .card {
+    border-radius: 11px;
+    min-height: 76px;
+    padding: 0.46rem 0.52rem;
+    justify-content: flex-start;
+    gap: 0.18rem;
+  }
+
+  .title {
+    font-size: 0.66rem;
+    line-height: 1.25;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .value {
+    margin: 0.1rem 0 0;
+    font-size: 0.9rem;
+  }
+
+  .description {
+    display: none;
+  }
+
+  .icon {
+    width: 20px;
+    height: 20px;
+    border-radius: 7px;
+    font-size: 0.64rem;
+  }
+}
