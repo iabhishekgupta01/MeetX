@@ -4,7 +4,7 @@ import axios from "axios";
 
 
 
-const Backendserver ="http://localhost:5000";
+const Backendserver = process.env.SERVER_URL || "http://localhost:5000";
 
 export const AuthContext = React.createContext({});
 
