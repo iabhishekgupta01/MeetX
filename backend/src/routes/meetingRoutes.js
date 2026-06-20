@@ -7,7 +7,6 @@ const {
   addParticipant,
   removeParticipant,
   endMeeting,
-  finalizeMeetingCaptions,
   getUserMeetings,
   getUserParticipatedMeetings,
   getMeetingByCode
@@ -20,7 +19,6 @@ router.post("/create", createMeeting);
 router.post("/join", addParticipant);
 router.post("/leave", removeParticipant);
 router.post("/end", endMeeting);
-router.post("/captions/finalize", finalizeMeetingCaptions);
 router.get("/user/:userId/hosted", getUserMeetings);
 router.get("/user/:userId/participated", getUserParticipatedMeetings);
 router.get("/code/:meetingCode", getMeetingByCode);

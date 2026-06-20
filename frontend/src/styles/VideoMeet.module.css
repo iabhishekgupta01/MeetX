@@ -733,85 +733,6 @@
 }
 
 /* =========================================
-   5. LIVE CAPTIONS
-   ========================================= */
-.captionsOverlay {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  bottom: 92px;
-  width: min(820px, 92vw);
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  z-index: 110;
-  pointer-events: none;
-}
-
-.captionItem {
-  background: var(--overlay-black-65);
-  border: 1px solid var(--border-medium);
-  border-radius: 12px;
-  padding: 8px 12px;
-  color: var(--text-white);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(8px);
-  display: flex;
-  gap: 8px;
-  align-items: baseline;
-}
-
-.captionName {
-  color: var(--lime-neon);
-  font-weight: 700;
-  font-size: 0.9rem;
-  white-space: nowrap;
-}
-
-.captionText {
-  color: var(--text-white);
-  font-size: 0.95rem;
-  line-height: 1.35;
-  word-break: break-word;
-}
-
-.captionSettings {
-  position: absolute;
-  left: 24px;
-  bottom: 100px;
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 12px;
-  background: rgba(10, 10, 10, 0.75);
-  border: 1px solid var(--border-medium);
-  border-radius: 999px;
-  backdrop-filter: blur(10px);
-  z-index: 105;
-}
-
-.captionSettingsInline {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  justify-content: space-between;
-}
-
-.captionLabel {
-  font-size: 0.85rem;
-  color: var(--text-muted);
-}
-
-.captionSelect {
-  background: var(--overlay-black-50);
-  color: var(--text-white);
-  border: 1px solid var(--border-bright);
-  border-radius: 10px;
-  padding: 6px 10px;
-  font-size: 0.85rem;
-}
-
-/* =========================================
   6. CONTROL BAR (COMPACT)
   ========================================= */
 .controlBar {
@@ -911,16 +832,6 @@
     padding: 10px;
     gap: 8px;
     bottom: 16px;
-  }
-
-  .captionsOverlay {
-    bottom: 84px;
-  }
-
-  .captionSettings {
-    left: 50%;
-    transform: translateX(-50%);
-    bottom: 160px;
   }
 
   .iconBtn { width: 40px; height: 40px; }

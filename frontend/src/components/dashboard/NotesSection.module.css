@@ -1,0 +1,345 @@
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+/* Page Header */
+.pageHeader {}
+
+.pageTitle {
+  margin: 0;
+  color: var(--text-white);
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.pageSub {
+  margin: 0.2rem 0 0;
+  color: var(--text-muted-2);
+  font-size: 0.8rem;
+}
+
+/* Empty state */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 4rem 2rem;
+  background: var(--bg-slate-800);
+  border: 1px solid var(--border-slate);
+  border-radius: 16px;
+  text-align: center;
+}
+
+.emptyIcon {
+  font-size: 3rem;
+}
+
+.emptyTitle {
+  margin: 0;
+  color: var(--text-strong);
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.emptyMsg {
+  margin: 0;
+  color: var(--text-muted-2);
+  font-size: 0.88rem;
+  max-width: 340px;
+  line-height: 1.5;
+}
+
+/* Controls */
+.controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 0.4rem;
+  background: var(--bg-slate-800);
+  border: 1px solid var(--border-slate);
+  border-radius: 10px;
+  padding: 4px;
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.85rem;
+  border-radius: 7px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.tab:hover {
+  color: var(--text-bright);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.tabActive {
+  background: rgba(99, 102, 241, 0.18);
+  color: #a5b4fc;
+  border: 1px solid rgba(99, 102, 241, 0.35) !important;
+}
+
+.tabBadge {
+  background: rgba(99, 102, 241, 0.25);
+  color: #c7d2fe;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 100px;
+}
+
+/* Search */
+.searchWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--bg-slate-800);
+  border: 1px solid var(--border-slate);
+  border-radius: 10px;
+  padding: 0.45rem 0.8rem;
+  min-width: 220px;
+  transition: border-color 0.2s;
+}
+
+.searchWrap:focus-within {
+  border-color: var(--border-slate-soft);
+}
+
+.searchWrap svg {
+  color: var(--text-muted-2);
+  flex-shrink: 0;
+}
+
+.searchInput {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: var(--text-white);
+  font-size: 0.875rem;
+  outline: none;
+}
+
+.searchInput::placeholder {
+  color: var(--text-muted-2);
+}
+
+.clearSearch {
+  border: none;
+  background: transparent;
+  color: var(--text-muted-2);
+  cursor: pointer;
+  font-size: 0.75rem;
+  padding: 0 0.2rem;
+  transition: color 0.15s;
+  flex-shrink: 0;
+}
+
+.clearSearch:hover {
+  color: var(--text-muted);
+}
+
+/* Empty tab state */
+.emptyTab {
+  padding: 3rem 2rem;
+  text-align: center;
+  background: var(--bg-slate-800);
+  border: 1px solid var(--border-slate);
+  border-radius: 14px;
+}
+
+.emptyTabText {
+  margin: 0;
+  color: var(--text-muted-2);
+  font-size: 0.9rem;
+}
+
+/* Notes Grid */
+.grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+/* Note Card */
+.noteCard {
+  background: var(--bg-slate-800);
+  border: 1px solid var(--border-slate);
+  border-radius: 14px;
+  padding: 1.2rem 1.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  transition: border-color 0.2s;
+}
+
+.noteCard:hover {
+  border-color: var(--border-slate-soft);
+}
+
+/* Note header */
+.noteHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.noteTitleGroup {
+  flex: 1;
+  min-width: 0;
+}
+
+.noteTitle {
+  margin: 0 0 0.3rem;
+  color: var(--text-white);
+  font-size: 0.98rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.noteMeta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.metaItem {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: var(--text-muted-2);
+  font-size: 0.78rem;
+}
+
+.metaItem svg {
+  flex-shrink: 0;
+}
+
+.rolePill {
+  padding: 0.15rem 0.55rem;
+  border-radius: 100px;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.pillHost   { background: rgba(59, 130, 246, 0.15); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.3); }
+.pillJoined { background: rgba(139, 92, 246, 0.15); color: #c4b5fd; border: 1px solid rgba(139, 92, 246, 0.3); }
+
+/* Type badge */
+.typeBadge {
+  padding: 0.25rem 0.65rem;
+  border-radius: 100px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  flex-shrink: 0;
+}
+
+.badgeSummary {
+  background: rgba(99, 102, 241, 0.12);
+  color: #a5b4fc;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+}
+
+/* Note content */
+.noteContent {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  line-height: 1.65;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Actions */
+.noteActions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  padding-top: 0.25rem;
+  border-top: 1px solid var(--border-slate);
+}
+
+.toggleBtn {
+  border: none;
+  background: transparent;
+  color: var(--accent-green-light, #86efac);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  transition: opacity 0.15s;
+}
+
+.toggleBtn:hover {
+  opacity: 0.75;
+}
+
+.detailBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  border: 1px solid var(--border-slate-soft);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 0.3rem 0.7rem;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: all 0.18s;
+  margin-left: auto;
+}
+
+.detailBtn:hover {
+  border-color: #6366f1;
+  color: #a5b4fc;
+  background: rgba(99, 102, 241, 0.08);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .searchWrap {
+    min-width: unset;
+    width: 100%;
+  }
+
+  .noteCard {
+    padding: 1rem;
+  }
+
+  .noteHeader {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}

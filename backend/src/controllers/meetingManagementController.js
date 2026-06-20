@@ -1,41 +1,5 @@
 const { Meeting } = require("../models/meetingModel");
 
-const parseCaptionPayload = ({ captionEntries, captions, captionsJsonText }) => {
-  const candidates = [captionEntries, captions, captionsJsonText];
-
-  for (const candidate of candidates) {
-    if (Array.isArray(candidate)) return candidate;
-    if (typeof candidate === "string" && candidate.trim()) {
-      try {
-        const parsed = JSON.parse(candidate);
-        if (Array.isArray(parsed)) return parsed;
-      } catch (_error) {
-      }
-    }
-  }
-
-  return [];
-};
-
-const normalizeCaptionEntries = (entries, fallback = {}) =>
-  entries
-    .map((entry) => {
-      const timestamp = entry?.timestamp ? new Date(entry.timestamp) : new Date();
-      if (Number.isNaN(timestamp.getTime())) return null;
-
-      const text = (entry?.text || "").toString().trim();
-      if (!text) return null;
-
-      return {
-        timestamp,
-        socketId: (entry?.socketId || fallback.socketId || "unknown").toString(),
-        userId: (entry?.userId || fallback.userId || "").toString(),
-        username: (entry?.username || fallback.username || "User").toString(),
-        text
-      };
-    })
-    .filter(Boolean);
-
 /**
  * Generate a unique meeting code
  */
@@ -290,7 +254,7 @@ exports.removeParticipant = async (req, res) => {
  */
 exports.endMeeting = async (req, res) => {
   try {
-    const { meetingId, transcript, summary, captionEntries, captions, captionsJsonText } = req.body;
+    const { meetingId, summary } = req.body;
 
     if (!meetingId) {
       return res.status(400).json({ error: "meetingId is required" });
@@ -311,46 +275,8 @@ exports.endMeeting = async (req, res) => {
       meeting.duration = Math.floor((meeting.endedAt - meeting.startedAt) / 1000); // duration in seconds
     }
 
-    if (transcript) {
-      meeting.transcript = transcript;
-    }
-
     if (summary) {
       meeting.summary = summary;
-    }
-
-    const incomingCaptions = parseCaptionPayload({ captionEntries, captions, captionsJsonText });
-    if (incomingCaptions.length > 0) {
-      const normalizedEntries = normalizeCaptionEntries(incomingCaptions);
-      if (normalizedEntries.length > 0) {
-        meeting.liveCaptions.push(...normalizedEntries);
-      }
-    }
-
-    if (meeting.liveCaptions && meeting.liveCaptions.length > 0) {
-      const orderedCaptions = [...meeting.liveCaptions]
-        .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-
-      meeting.captionsJsonText = JSON.stringify(
-        orderedCaptions.map((entry) => ({
-          timestamp: new Date(entry.timestamp).toISOString(),
-          socketId: entry.socketId,
-          userId: entry.userId || "",
-          username: entry.username,
-          text: entry.text
-        }))
-      );
-
-      const ordered = orderedCaptions
-        .map((entry) => {
-          const time = new Date(entry.timestamp).toISOString();
-          return `[${time}] ${entry.username}: ${entry.text}`;
-        })
-        .join("\n");
-
-      if (!meeting.transcript) {
-        meeting.transcript = ordered;
-      }
     }
 
     await meeting.save();
@@ -362,59 +288,6 @@ exports.endMeeting = async (req, res) => {
   } catch (error) {
     console.error("Error ending meeting:", error);
     return res.status(500).json({ error: "Failed to end meeting" });
-  }
-};
-
-exports.finalizeMeetingCaptions = async (req, res) => {
-  try {
-    const { meetingId, userId, username, captions, captionEntries, captionsJsonText } = req.body;
-
-    if (!meetingId) {
-      return res.status(400).json({ error: "meetingId is required" });
-    }
-
-    const incomingCaptions = parseCaptionPayload({ captionEntries, captions, captionsJsonText });
-    if (incomingCaptions.length === 0) {
-      return res.status(400).json({ error: "captions JSON is required" });
-    }
-
-    const meeting = await Meeting.findOne({ meetingId });
-    if (!meeting) {
-      return res.status(404).json({ error: "Meeting not found" });
-    }
-
-    const normalizedEntries = normalizeCaptionEntries(incomingCaptions, {
-      userId,
-      username
-    });
-
-    if (normalizedEntries.length === 0) {
-      return res.status(400).json({ error: "No valid caption entries" });
-    }
-
-    meeting.liveCaptions.push(...normalizedEntries);
-
-    const orderedCaptions = [...meeting.liveCaptions]
-      .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-    meeting.captionsJsonText = JSON.stringify(
-      orderedCaptions.map((entry) => ({
-        timestamp: new Date(entry.timestamp).toISOString(),
-        socketId: entry.socketId,
-        userId: entry.userId || "",
-        username: entry.username,
-        text: entry.text
-      }))
-    );
-
-    await meeting.save();
-
-    return res.json({
-      message: "Caption JSON saved",
-      saved: normalizedEntries.length
-    });
-  } catch (error) {
-    console.error("Error finalizing meeting captions:", error);
-    return res.status(500).json({ error: "Failed to finalize meeting captions" });
   }
 };
 

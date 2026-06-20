@@ -17,6 +17,8 @@ import MeetingActivityChart from "../components/dashboard/analytics/MeetingActiv
 import RecentActivityFeed from "../components/dashboard/analytics/RecentActivityFeed";
 import UpcomingMeetingsPanel from "../components/dashboard/analytics/UpcomingMeetingsPanel";
 import MeetingInsights from "../components/dashboard/analytics/MeetingInsights";
+import ProfileSection from "../components/dashboard/ProfileSection";
+import NotesSection from "../components/dashboard/NotesSection";
 import styles from "../styles/Dashboard.module.css";
 
 
@@ -371,6 +373,17 @@ function Dashboard() {
     setIsMobileMenuOpen(false);
   };
 
+  const openProfileSection = () => {
+    setActiveSection("profile");
+    setIsMobileMenuOpen(false);
+  };
+
+  const openNotesSection = () => {
+    setActiveSection("notes");
+    fetchMeetings();
+    setIsMobileMenuOpen(false);
+  };
+
   const handleStatusFilterChange = (value) => {
     setStatusFilter(value);
     setActiveSection("meetings");
@@ -559,6 +572,8 @@ function Dashboard() {
         activeSection={activeSection}
         onOpenMeetings={openMeetingsSection}
         onOpenAnalytics={openAnalyticsSection}
+        onOpenProfile={openProfileSection}
+        onOpenNotes={openNotesSection}
         onCreateMeeting={() => setShowCreateModal(true)}
         onJoinByCode={() => setShowJoinByCodeModal(true)}
         onRefresh={fetchMeetings}
@@ -576,10 +591,12 @@ function Dashboard() {
           onGoScheduled={() => handleTabChange("scheduled")}
           onGoCompleted={() => handleTabChange("completed")}
           onGoAnalytics={openAnalyticsSection}
+          onGoProfile={openProfileSection}
+          onGoNotes={openNotesSection}
           onLogout={handleLogoutClick}
         />
 
-        {activeSection === "meetings" ? (
+        {activeSection === "meetings" && (
           <>
             <DashboardMobileActions
               onCreateMeeting={() => setShowCreateModal(true)}
@@ -610,7 +627,9 @@ function Dashboard() {
               sectionRef={meetingsSectionRef}
             />
           </>
-        ) : (
+        )}
+
+        {activeSection === "analytics" && (
           <section className={styles.analyticsStack}>
             <div className={styles.analyticsHeaderRow}>
               <div>
@@ -638,6 +657,20 @@ function Dashboard() {
 
             <MeetingInsights insights={analyticsData.insights} />
           </section>
+        )}
+
+        {activeSection === "profile" && (
+          <ProfileSection
+            hostedMeetings={hostedMeetings}
+            participatedMeetings={participatedMeetings}
+          />
+        )}
+
+        {activeSection === "notes" && (
+          <NotesSection
+            allMeetings={getAllMeetingsUnique()}
+            onOpenDetail={openDetailModal}
+          />
         )}
 
         {showJoinByCodeModal && (

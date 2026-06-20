@@ -73,38 +73,6 @@ const meetingSchema=new Schema({
         type:Number,
         default:0
     },
-    transcript:{
-        type:String,
-        default:""
-    },
-    captionsJsonText:{
-        type:String,
-        default:""
-    },
-    liveCaptions:[
-        {
-            timestamp:{
-                type:Date,
-                required:true
-            },
-            socketId:{
-                type:String,
-                required:true
-            },
-            userId:{
-                type:String,
-                default:""
-            },
-            username:{
-                type:String,
-                required:true
-            },
-            text:{
-                type:String,
-                required:true
-            }
-        }
-    ],
     summary:{
         type:String,
         default:""

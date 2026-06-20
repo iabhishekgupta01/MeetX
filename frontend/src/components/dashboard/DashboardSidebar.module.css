@@ -87,15 +87,14 @@
 .userLabel {
   font-size: 0.7rem;
   color: var(--text-muted-2);
-  text-transform: uppercase;
-  font-weight: 700;
-  letter-spacing: 0.5px;
+  font-weight: 500;
+  letter-spacing: 0.2px;
 }
 
 .userName {
   font-size: 0.95rem;
   color: var(--text-strong);
-  font-weight: 600;
+  font-weight: 700;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -174,6 +173,49 @@
 }
 
 .primaryBtn svg { color: var(--text-white) !important; }
+
+/* Quick Actions square grid */
+.quickActionsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+  margin-bottom: 0.25rem;
+}
+
+.quickBtn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.85rem 0.5rem;
+  border-radius: 12px;
+  border: none;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  text-align: center;
+  line-height: 1.2;
+  color: #fff;
+}
+
+.quickBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+}
+
+.quickBtnNew {
+  background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+.quickBtnNew:hover { background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%); }
+
+.quickBtnJoin {
+  background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+}
+.quickBtnJoin:hover { background: linear-gradient(135deg, #6d28d9 0%, #7c3aed 100%); }
 
 /* 4. Footer / Logout */
 .footerSection {

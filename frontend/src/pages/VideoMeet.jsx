@@ -3,8 +3,7 @@ import { useSearchParams, useParams } from "react-router-dom";
 import io from "socket.io-client";
 import axios from "axios";
 import styles from "../styles/VideoMeet.module.css";
-import MeetingRecorder from "../components/MeetingRecorder";
-import LiveCaptions from "../components/LiveCaptions";
+import TranscriptionRecorder from "../utils/transcriptionRecorder";
 
 // ⚠️ CHECK THIS: Must match your Backend Port
 const serverUrl = "http://localhost:5000";
@@ -98,8 +97,6 @@ function VideoMeetComponent() {
   const [videoEnabled, setVideoEnabled] = useState(true);
   const [audioEnabled, setAudioEnabled] = useState(true);
   const [isScreenSharing, setIsScreenSharing] = useState(false);
-  const [isRecording, setIsRecording] = useState(false);
-  const [transcript, setTranscript] = useState("");
   const [activeSpeakerId, setActiveSpeakerId] = useState("local");
   const [codeCopied, setCodeCopied] = useState(false);
   const [mutedPeers, setMutedPeers] = useState({});
@@ -107,9 +104,6 @@ function VideoMeetComponent() {
   const [endModal, setEndModal] = useState(null);
   const [endConfirmOpen, setEndConfirmOpen] = useState(false);
   const [muteNotice, setMuteNotice] = useState(null);
-  const [liveCaptions, setLiveCaptions] = useState({});
-  const [showCaptions, setShowCaptions] = useState(true);
-  const [captionsModuleActive, setCaptionsModuleActive] = useState(false);
 
   // WebRTC
   const [peers, setPeers] = useState([]);
@@ -122,20 +116,7 @@ function VideoMeetComponent() {
   const localUserIdRef = useRef(localStorage.getItem("userId") || "guest");
   const meetingEndRef = useRef(false);
   const meetingIdRef = useRef("");
-  const captionRecognitionRef = useRef(null);
-  const captionRestartTimeoutRef = useRef(null);
-  const captionsEnabledRef = useRef(false);
-  const lastCaptionRef = useRef({ text: "", isFinal: false });
-  const captionRestartCountRef = useRef(0);
-  const captionStartingRef = useRef(false);
-  const audioEnabledRef = useRef(true);
-  const isInLobbyRef = useRef(true);
-  const pendingCaptionRef = useRef({ text: "", timerId: null });
-  const pendingFinalRef = useRef({ text: "", timerId: null });
-  const captionsModuleActiveRef = useRef(false);
-  const captionsBufferRef = useRef([]);
-  const prevRecordingRef = useRef(false);
-  const isFlushingCaptionsRef = useRef(false);
+  const transcriptionRef = useRef(null);
 
   const orderedPeers = (() => {
     const list = [...peers];
@@ -212,7 +193,6 @@ function VideoMeetComponent() {
     return () => {
         if(localStreamRef.current) localStreamRef.current.getTracks().forEach(t => t.stop());
         if(socketRef.current) socketRef.current.disconnect();
-        stopLiveCaptions();
         Object.values(audioMonitorRef.current).forEach((monitor) => {
           if (monitor?.rafId) cancelAnimationFrame(monitor.rafId);
           if (monitor?.audioContext && monitor.audioContext.state !== "closed") {
@@ -227,57 +207,8 @@ function VideoMeetComponent() {
   }, [meetingId]);
 
   useEffect(() => {
-    audioEnabledRef.current = audioEnabled;
-  }, [audioEnabled]);
-
-  useEffect(() => {
     mutedPeersRef.current = mutedPeers;
   }, [mutedPeers]);
-
-  useEffect(() => {
-    isInLobbyRef.current = isInLobby;
-  }, [isInLobby]);
-
-  useEffect(() => {
-    captionsModuleActiveRef.current = captionsModuleActive;
-  }, [captionsModuleActive]);
-
-  useEffect(() => {
-    const wasRecording = prevRecordingRef.current;
-    if (wasRecording && !isRecording) {
-      flushCaptionBuffer("recording-ended");
-    }
-    prevRecordingRef.current = isRecording;
-  }, [isRecording]);
-
-  useEffect(() => {
-    const interval = window.setInterval(() => {
-      const now = Date.now();
-      setLiveCaptions((prev) => {
-        const next = {};
-        Object.values(prev).forEach((caption) => {
-          const ttl = caption.isFinal ? 12000 : 6000;
-          if (now - caption.updatedAt <= ttl) {
-            next[caption.id] = caption;
-          }
-        });
-        if (Object.keys(next).length === Object.keys(prev).length) return prev;
-        return next;
-      });
-    }, 1000);
-
-    return () => window.clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    if (isInLobby || !audioEnabled) {
-      stopLiveCaptions();
-      return;
-    }
-    if (socketRef.current?.connected) {
-      startLiveCaptions();
-    }
-  }, [isInLobby, audioEnabled]);
 
   useEffect(() => {
     if (!lobbyPreviewVideoRef.current || !localStream) return;
@@ -288,219 +219,31 @@ function VideoMeetComponent() {
     }
   }, [localStream]);
 
-  function shouldRunCaptions() {
-    return !isInLobbyRef.current && audioEnabledRef.current;
-  }
+  useEffect(() => {
+    if (!localStream || !meetingId || isInLobby) return;
 
-  function upsertCaption(id, name, text, isFinal) {
-    if (!id || !text) return;
-    setLiveCaptions((prev) => ({
-      ...prev,
-      [id]: {
-        id,
-        username: name || "User",
-        text,
-        isFinal: !!isFinal,
-        updatedAt: Date.now()
-      }
-    }));
-  }
+    const audioTracks = localStream.getAudioTracks ? localStream.getAudioTracks() : [];
+    if (!audioTracks || audioTracks.length === 0) return;
 
-  function emitLocalCaption(text, isFinal) {
-    const normalized = text.trim();
-    if (!normalized) return;
-
-    const activeMeetingId = meetingIdRef.current || meetingId;
-    if (!socketRef.current || !activeMeetingId) return;
-
-    const last = lastCaptionRef.current;
-    if (last.text === normalized && last.isFinal === isFinal) return;
-    lastCaptionRef.current = { text: normalized, isFinal };
-
-    const socketId = socketRef.current.id || "local";
-    const displayName = username || "User";
-
-    upsertCaption("local", displayName, normalized, isFinal);
-    socketRef.current.emit("live-caption", {
-      meetingId: activeMeetingId,
-      socketId,
-      username: displayName,
-      text: normalized,
-      isFinal
+    // Reuse existing local mic track without requesting permissions again.
+    const transcriptionStream = new MediaStream(audioTracks);
+    const recorder = new TranscriptionRecorder({
+      userId: localUserIdRef.current,
+      meetingId: meetingIdRef.current || meetingId,
+      stream: transcriptionStream
     });
 
-    if (isFinal) {
-      captionsBufferRef.current.push({
-        meetingId: activeMeetingId,
-        timestamp: new Date().toISOString(),
-        socketId,
-        userId: localUserIdRef.current,
-        username: displayName,
-        text: normalized
-      });
-    }
-  }
+    transcriptionRef.current = recorder;
+    recorder.init();
+    recorder.start();
 
-  async function flushCaptionBuffer(trigger) {
-    const activeMeetingId = meetingIdRef.current || meetingId;
-    if (!activeMeetingId) return;
-    if (isFlushingCaptionsRef.current) return;
-
-    const entries = [...captionsBufferRef.current];
-    if (entries.length === 0) return;
-
-    isFlushingCaptionsRef.current = true;
-    try {
-      await axios.post(`${serverUrl}/api/v1/meeting/captions/finalize`, {
-        meetingId: activeMeetingId,
-        userId: localUserIdRef.current,
-        username: username || "User",
-        trigger,
-        captions: entries
-      });
-      captionsBufferRef.current = [];
-    } catch (error) {
-      console.error("Failed to flush captions:", error);
-    } finally {
-      isFlushingCaptionsRef.current = false;
-    }
-  }
-
-  function stopLiveCaptions() {
-    captionsEnabledRef.current = false;
-    lastCaptionRef.current = { text: "", isFinal: false };
-    captionRestartCountRef.current = 0;
-    captionStartingRef.current = false;
-    if (pendingFinalRef.current.timerId) {
-      window.clearTimeout(pendingFinalRef.current.timerId);
-      pendingFinalRef.current.timerId = null;
-    }
-    if (pendingFinalRef.current.text) {
-      emitLocalCaption(pendingFinalRef.current.text, true);
-    }
-    pendingFinalRef.current.text = "";
-    if (pendingCaptionRef.current.timerId) {
-      window.clearTimeout(pendingCaptionRef.current.timerId);
-      pendingCaptionRef.current.timerId = null;
-    }
-    pendingCaptionRef.current.text = "";
-    if (captionRestartTimeoutRef.current) {
-      window.clearTimeout(captionRestartTimeoutRef.current);
-      captionRestartTimeoutRef.current = null;
-    }
-    if (captionRecognitionRef.current) {
-      captionRecognitionRef.current.onend = null;
-      captionRecognitionRef.current.onerror = null;
-      captionRecognitionRef.current.onresult = null;
-      captionRecognitionRef.current.stop();
-      captionRecognitionRef.current = null;
-    }
-  }
-
-  function startLiveCaptions() {
-    const activeMeetingId = meetingIdRef.current || meetingId;
-    if (captionRecognitionRef.current || captionStartingRef.current) return;
-    if (!socketRef.current || !activeMeetingId) return;
-    if (!shouldRunCaptions()) return;
-
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) return;
-
-    const recognition = new SpeechRecognition();
-    recognition.continuous = true;
-    recognition.interimResults = true;
-    recognition.lang = "en-US";
-    recognition.maxAlternatives = 1;
-    captionsEnabledRef.current = true;
-    captionStartingRef.current = true;
-
-    const allowInterimCaptions = false;
-    const finalFlushDelayMs = 900;
-
-    const emitFinalBuffer = () => {
-      if (!pendingFinalRef.current.text) return;
-      const combined = pendingFinalRef.current.text.trim();
-      pendingFinalRef.current.text = "";
-      emitLocalCaption(combined, true);
-    };
-
-    const scheduleRestart = (delay = 400) => {
-      if (!captionsEnabledRef.current || !shouldRunCaptions()) return;
-      if (captionRestartTimeoutRef.current) return;
-      captionRestartCountRef.current += 1;
-      const backoff = Math.min(delay + captionRestartCountRef.current * 250, 3000);
-      captionRestartTimeoutRef.current = window.setTimeout(() => {
-        captionRestartTimeoutRef.current = null;
-        startLiveCaptions();
-      }, backoff);
-    };
-
-    recognition.onstart = () => {
-      captionStartingRef.current = false;
-      captionRestartCountRef.current = 0;
-    };
-
-    recognition.onresult = (event) => {
-      let interimText = "";
-      let finalText = "";
-
-      for (let i = event.resultIndex; i < event.results.length; i += 1) {
-        const chunk = event.results[i][0]?.transcript || "";
-        if (event.results[i].isFinal) {
-          finalText += chunk;
-        } else {
-          interimText += chunk;
-        }
+    return () => {
+      recorder.destroy();
+      if (transcriptionRef.current === recorder) {
+        transcriptionRef.current = null;
       }
-
-      if (finalText.trim()) {
-        if (pendingCaptionRef.current.timerId) {
-          window.clearTimeout(pendingCaptionRef.current.timerId);
-          pendingCaptionRef.current.timerId = null;
-        }
-        pendingCaptionRef.current.text = "";
-
-        const next = `${pendingFinalRef.current.text} ${finalText}`.trim();
-        pendingFinalRef.current.text = next;
-        if (pendingFinalRef.current.timerId) {
-          window.clearTimeout(pendingFinalRef.current.timerId);
-        }
-        pendingFinalRef.current.timerId = window.setTimeout(() => {
-          pendingFinalRef.current.timerId = null;
-          emitFinalBuffer();
-        }, finalFlushDelayMs);
-        return;
-      }
-      if (!allowInterimCaptions) return;
     };
-
-    recognition.onerror = (event) => {
-      const error = event?.error;
-      if (error === "not-allowed" || error === "service-not-allowed") {
-        captionsEnabledRef.current = false;
-        captionStartingRef.current = false;
-        return;
-      }
-      captionStartingRef.current = false;
-      scheduleRestart(700);
-    };
-
-    recognition.onend = () => {
-      captionRecognitionRef.current = null;
-      captionStartingRef.current = false;
-      if (!captionsEnabledRef.current || !shouldRunCaptions()) return;
-      scheduleRestart(400);
-    };
-
-    try {
-      recognition.start();
-      captionRecognitionRef.current = recognition;
-    } catch (error) {
-      captionStartingRef.current = false;
-      captionRecognitionRef.current = null;
-      scheduleRestart(900);
-    }
-  }
+  }, [localStream, meetingId, isInLobby]);
 
   const startAudioMonitor = (stream, id) => {
     if (!stream || audioMonitorRef.current[id]) return;
@@ -594,7 +337,6 @@ function VideoMeetComponent() {
       
       socketRef.current.emit("join-call", { meetingId: resolvedMeetingId, username, userId });
       meetingIdRef.current = resolvedMeetingId;
-      startLiveCaptions();
     });
 
     socketRef.current.on("user-joined", (socketId, clients) => {
@@ -652,12 +394,6 @@ function VideoMeetComponent() {
         if (connectionsRef.current[id]) connectionsRef.current[id].close();
         delete connectionsRef.current[id];
         setPeers((prev) => prev.filter((p) => p.socketId !== id));
-        setLiveCaptions((prev) => {
-          if (!prev[id]) return prev;
-          const next = { ...prev };
-          delete next[id];
-          return next;
-        });
         setMutedPeers((prev) => {
           if (!prev[id]) return prev;
           const next = { ...prev };
@@ -736,24 +472,6 @@ function VideoMeetComponent() {
     socketRef.current.on("admin-action-error", (payload) => {
       alert(payload?.message || "Admin action failed.");
     });
-
-    socketRef.current.on("caption-module-started", () => {
-      setCaptionsModuleActive(true);
-    });
-
-    socketRef.current.on("caption-module-status", (payload) => {
-      if (payload?.enabled) {
-        setCaptionsModuleActive(true);
-      }
-    });
-
-    socketRef.current.on("live-caption-update", (payload) => {
-      if (!payload) return;
-      const { socketId, username: captionUser, text, isFinal } = payload;
-      if (!socketId || !text) return;
-      if (socketRef.current?.id && socketId === socketRef.current.id) return;
-      upsertCaption(socketId, captionUser || "User", text, !!isFinal);
-    });
     setIsJoining(false);
   };
 
@@ -796,11 +514,6 @@ function VideoMeetComponent() {
           setAudioEnabled(t.enabled);
           if (!t.enabled && activeSpeakerId === "local") {
             setActiveSpeakerId(null);
-          }
-          if (!t.enabled) {
-            stopLiveCaptions();
-          } else {
-            startLiveCaptions();
           }
           if (socketRef.current && socketRef.current.id && meetingId) {
             socketRef.current.emit(t.enabled ? "peer-unmuted" : "peer-muted", {
@@ -870,10 +583,7 @@ function VideoMeetComponent() {
   };
   const endCall = async ({ message, showModal = false } = {}) => {
     if (showModal && message) {
-      await flushCaptionBuffer("meeting-ended");
       socketRef.current?.disconnect();
-      stopLiveCaptions();
-      setLiveCaptions({});
       setEndModal({
         title: meetingEndRef.current ? "Meeting ended" : "Call ended",
         message,
@@ -884,11 +594,9 @@ function VideoMeetComponent() {
 
     if (isAdmin && meetingId && !meetingEndRef.current) {
       meetingEndRef.current = true;
-      await flushCaptionBuffer("meeting-ended");
       try {
         await axios.post(`${serverUrl}/api/v1/meeting/end`, {
-          meetingId,
-          transcript
+          meetingId
         });
       } catch (error) {
         console.error("Failed to end meeting:", error);
@@ -899,10 +607,7 @@ function VideoMeetComponent() {
       });
     }
 
-    await flushCaptionBuffer("meeting-ended");
     socketRef.current?.disconnect();
-    stopLiveCaptions();
-    setLiveCaptions({});
     window.location.href = "/";
   };
 
@@ -983,14 +688,6 @@ function VideoMeetComponent() {
       setCodeCopied(false);
     }
   };
-
-  const activeCaptionId = activeSpeakerId || null;
-  const activeCaption = activeCaptionId ? liveCaptions[activeCaptionId] : null;
-  const otherCaptions = Object.values(liveCaptions)
-    .filter((caption) => caption.id !== activeCaptionId)
-    .sort((a, b) => b.updatedAt - a.updatedAt)
-    .slice(0, 3);
-  const captionList = activeCaption ? [activeCaption, ...otherCaptions] : otherCaptions;
 
   
   return (
@@ -1115,38 +812,6 @@ function VideoMeetComponent() {
              <button onClick={toggleVideo} className={`${styles.iconBtn} ${!videoEnabled ? styles.off : ''}`}>{videoEnabled ? <Icons.Video /> : <Icons.VideoOff />}</button>
              <button onClick={handleScreenShare} className={`${styles.iconBtn} ${isScreenSharing ? styles.active : ''}`}><Icons.ScreenShare /></button>
              <div className={styles.sep}></div>
-             <MeetingRecorder transcript={transcript} setTranscript={setTranscript} isRecording={isRecording} setIsRecording={setIsRecording}/>
-             <button
-               onClick={() => {
-                 if (!isAdmin) {
-                   alert("Only the host can create the module.");
-                   return;
-                 }
-                 if (!socketRef.current || !meetingId) return;
-                 socketRef.current.emit("admin-start-caption-module", {
-                   meetingId,
-                   userId: localUserIdRef.current
-                 });
-               }}
-               className={`${styles.iconBtn} ${captionsModuleActive ? styles.active : ""}`}
-               title={
-                 captionsModuleActive
-                   ? "Caption module active"
-                   : isAdmin
-                     ? "Create module"
-                     : "Host only"
-               }
-               disabled={!isAdmin || captionsModuleActive}
-             >
-               CM
-             </button>
-             <button
-               onClick={() => setShowCaptions((prev) => !prev)}
-               className={`${styles.iconBtn} ${showCaptions ? styles.active : ""}`}
-               title={showCaptions ? "Hide captions" : "Show captions"}
-             >
-               CC
-             </button>
              <button
                onClick={() => {
                  if (isAdmin) {
@@ -1160,8 +825,6 @@ function VideoMeetComponent() {
                <Icons.EndCall />
              </button>
           </div>
-
-          {showCaptions && <LiveCaptions captions={captionList} />}
 
           {removeTarget && (
             <div
