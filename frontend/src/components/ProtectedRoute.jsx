@@ -6,7 +6,7 @@ const ProtectedRoute = ({ element }) => {
   const { isAuthenticated, isLoading } = useContext(AuthContext);
 
   if (isLoading) {
-    return <div>Loading...</div>; // You can replace this with a spinner component
+    return <div>Loading...</div>; // 
   }
 
   if (!isAuthenticated) {

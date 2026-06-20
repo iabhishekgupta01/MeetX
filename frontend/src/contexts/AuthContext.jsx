@@ -4,7 +4,7 @@ import axios from "axios";
 
 
 
-const Backendserver = process.env.SERVER_URL || "http://localhost:5000";
+const Backendserver = process.env.SERVER_URL || "http://localhost:8080";
 
 export const AuthContext = React.createContext({});
 
@@ -16,6 +16,7 @@ export const AuthProvider = ({children}) => {
 
     const client = axios.create({
         baseURL:`${Backendserver}/api/v1/users`
+
     });
 
     // Check if user is already logged in on mount
@@ -41,6 +42,9 @@ export const AuthProvider = ({children}) => {
             }
 
         } catch (err) {
+            if (err.response) {
+                throw new Error(err.response.data.message);
+            }
             throw err;
         }
 
