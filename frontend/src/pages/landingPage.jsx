@@ -1,13 +1,31 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import "../App.css";
 import Button from '@mui/material/Button';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
 
-
 function LandingPage() {
     const navigate = useNavigate();
     const { isAuthenticated, handleLogout } = useContext(AuthContext);
+    
+    // 1. Add state to hold the install prompt event
+    const [deferredPrompt, setDeferredPrompt] = useState(null);
+
+    // 2. Listen for the browser's install prompt
+    useEffect(() => {
+        const handleBeforeInstallPrompt = (e) => {
+            // Prevent Chrome 67 and earlier from automatically showing the prompt
+            e.preventDefault();
+            // Stash the event so it can be triggered later
+            setDeferredPrompt(e);
+        };
+
+        window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+        return () => {
+            window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+        };
+    }, []);
 
     const handleLogoutClick = () => {
         handleLogout();
@@ -17,6 +35,24 @@ function LandingPage() {
 
     const handleDashboard = () => {
         navigate("/dashboard");
+    };
+
+    // 3. Function to run when they click the download text
+    const handleDownloadClick = async () => {
+        if (deferredPrompt) {
+            // Show the install prompt
+            deferredPrompt.prompt();
+            // Wait for the user to respond to the prompt
+            const { outcome } = await deferredPrompt.userChoice;
+            if (outcome === 'accepted') {
+                console.log('MeetX installed successfully!');
+            }
+            // We've used the prompt, and can't use it again, throw it away
+            setDeferredPrompt(null);
+        } else {
+            // If the prompt isn't available (already installed, or unsupported browser)
+            alert("MeetX is already installed or your browser doesn't support PWA installation directly from here!");
+        }
     };
 
     return (<>
@@ -74,8 +110,13 @@ function LandingPage() {
                     <img src="/videocall-image.png" alt="video-call-image" className="hero-image" />
                 </div>
             </div>
-        </div>
+            
+            {/* 4. Add the onClick event to the download span */}
+            <div className="download-section">
+                <p>Want a seamless experience? <span className="download-link" onClick={handleDownloadClick}>Click here to download app</span></p>
+            </div>
 
+        </div>
     </>);
 }
 
