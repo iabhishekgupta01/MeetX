@@ -3,13 +3,13 @@
   "name": "MeetX",
   "icons": [
     {
-      "src": "meetX-logo-192.png",
+      "src": "/meetX-logo-192.png",
       "type": "image/png",
       "sizes": "192x192",
       "purpose": "any maskable"
     },
     {
-      "src": "meetX-logo-512.png",
+      "src": "/meetX-logo-512.png",
       "type": "image/png",
       "sizes": "512x512",
       "purpose": "any maskable"
