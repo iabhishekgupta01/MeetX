@@ -71,7 +71,7 @@ function LandingPage() {
                     )}
                 </div>
                 <div className="landing-main-right">
-                    <img src="/videocall-image.png" alt="video-call-image" style={{ height: "20rem" }} />
+                    <img src="/videocall-image.png" alt="video-call-image" className="hero-image" />
                 </div>
             </div>
         </div>

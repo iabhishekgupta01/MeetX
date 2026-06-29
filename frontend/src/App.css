@@ -1,19 +1,15 @@
 * {
-
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-
 }
 
 .landingPageContainer {
   color: rgb(255, 255, 255);
-  height: 100vh;
+  min-height: 100vh; /* Changed to min-height so content doesn't overflow on mobile */
   width: 100vw;
-  background: url("../public/landingPage.jpg");
-  background-size: cover;
-
-
+  background: url("../public/landingPage.jpg") center/cover no-repeat;
+  overflow-x: hidden; /* Prevents side-scrolling */
 }
 
 .landingPageContainer nav {
@@ -25,34 +21,39 @@
   align-items: center;
   position: sticky;
   top: 0;
-
+  z-index: 10;
 }
 
 .landingPageContainer nav .navList {
   display: flex;
   gap: 1.6rem;
   font-size: 1.2rem;
-  cursor: pointer;
+  align-items: center;
 }
 
-
+.landingPageContainer nav .navList a {
+  color: inherit;
+  text-decoration: none;
+}
 
 .landingPageContainer nav h2 {
   font-weight: 500;
   font-size: 1.8rem;
 }
 
-.landingPageContainer nav .navList>*:hover {
+.landingPageContainer nav .navList > *:hover {
   color: #dae364;
+  cursor: pointer;
 }
 
 .landingMainContainer {
   color: rgb(255, 255, 255);
-  margin: 5rem 1rem;
+  margin: 5rem 2rem;
   display: flex;
   justify-content: space-around;
-  flex-wrap: wrap;
-
+  align-items: center;
+  flex-wrap: wrap-reverse; /* Ensures image goes to top on mobile */
+  gap: 3rem;
 }
 
 .landingMainContainer .landing-main-left {
@@ -60,8 +61,55 @@
   flex-direction: column;
   gap: 1.3rem;
   justify-content: center;
-  flex-wrap: wrap;
   font-size: 1.6rem;
+  flex: 1 1 400px; /* Allows it to shrink/grow properly */
+}
 
+.landingMainContainer .landing-main-right {
+  flex: 1 1 400px;
+  display: flex;
+  justify-content: center;
+}
 
+/* Replaces your inline style in React */
+.hero-image {
+  max-width: 100%;
+  height: auto;
+  max-height: 25rem;
+  object-fit: contain;
+}
+
+/* --- MOBILE RESPONSIVENESS --- */
+@media screen and (max-width: 768px) {
+  .landingPageContainer nav {
+    flex-direction: column; /* Stacks logo and nav links */
+    gap: 1rem;
+    padding-block: 1rem;
+  }
+
+  .landingPageContainer nav .navList {
+    gap: 1rem;
+    font-size: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .landingMainContainer {
+    margin: 3rem 1.5rem;
+    text-align: center; /* Centers text for mobile */
+  }
+
+  .landingMainContainer .landing-main-left {
+    align-items: center; /* Centers the button */
+    font-size: 1.2rem;
+    flex-basis: 100%;
+  }
+
+  .landingMainContainer .landing-main-left h1 {
+    font-size: 2.2rem;
+  }
+
+  .hero-image {
+    max-height: 18rem; /* Slightly smaller image on phones */
+  }
 }

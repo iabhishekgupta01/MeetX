@@ -6,7 +6,7 @@ import styles from "../styles/VideoMeet.module.css";
 import TranscriptionRecorder from "../utils/transcriptionRecorder";
 
 // ⚠️ CHECK THIS: Must match your Backend Port
-const serverUrl = "http://localhost:5000";
+const serverUrl ="https://meetx-tptq.onrender.com"|| "http://localhost:8080"
 
 const peerConfigConnections = {
   iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
