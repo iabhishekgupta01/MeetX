@@ -24,7 +24,7 @@ export default function Authentication() {
     setMessage("");
     setLoading(true);
 
-    try {
+    try { 
       if (isSignup) {
         const res = await handleRegister(name, username, password);
         setMessage(res || "Account created successfully 🎉");
